@@ -1,0 +1,115 @@
+{
+	"width": 576,
+	"height": 324,
+	"fps": 30,
+	"main": "./script/main.js",
+	"assets": {
+		"main": {
+			"type": "script",
+			"path": "script/main.js",
+			"global": true
+		},
+		"othello_disk": {
+			"type": "image",
+			"width": 224,
+			"height": 32,
+			"path": "image/othello_disk.png"
+		},
+		"config": {
+			"type": "script",
+			"path": "script/config.js",
+			"global": true
+		},
+		"window_manager_icons": {
+			"type": "image",
+			"width": 128,
+			"height": 160,
+			"path": "image/window_manager_icons.png"
+		},
+		"object_group": {
+			"type": "script",
+			"path": "script/object_group.js",
+			"global": true
+		},
+		"pointer": {
+			"type": "script",
+			"path": "script/ex_window/pointer.js",
+			"global": true
+		},
+		"statusbar": {
+			"type": "script",
+			"path": "script/ex_window/statusbar.js",
+			"global": true
+		},
+		"process": {
+			"type": "script",
+			"path": "script/ex_window/process.js",
+			"global": true
+		},
+		"commenting": {
+			"type": "script",
+			"path": "script/ex_window/commenting.js",
+			"global": true
+		},
+		"player": {
+			"type": "script",
+			"path": "script/ex_window/player.js",
+			"global": true
+		},
+		"piece": {
+			"type": "script",
+			"path": "script/piece.js",
+			"global": true
+		},
+		"help_screen": {
+			"type": "image",
+			"width": 640,
+			"height": 480,
+			"path": "image/help_screen.png"
+		},
+		"common": {
+			"type": "script",
+			"path": "script/ex_window/common.js",
+			"global": true
+		},
+		"common_control": {
+			"type": "script",
+			"path": "script/ex_window/common_control.js",
+			"global": true
+		},
+		"help": {
+			"type": "script",
+			"path": "script/ex_window/help.js",
+			"global": true
+		},
+		"confirm": {
+			"type": "script",
+			"path": "script/ex_window/confirm.js",
+			"global": true
+		},
+		"admin_control": {
+			"type": "script",
+			"path": "script/ex_window/admin_control.js",
+			"global": true
+		},
+		"set_initial_locations": {
+			"type": "script",
+			"path": "script/set_initial_locations.js",
+			"global": true
+		},
+		"window_manager": {
+			"type": "script",
+			"path": "script/ex_window/window_manager.js",
+			"global": true
+		},
+		"help_screen_solo": {
+			"type": "image",
+			"width": 640,
+			"height": 480,
+			"path": "image/help_screen_solo.png"
+		}
+	},
+	"environment": {
+		"sandbox-runtime": "2"
+	}
+}
