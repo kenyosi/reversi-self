@@ -11,29 +11,71 @@ var timeout_delta_frame        = 3   * g.game.fps;
 var drpf                       = 7; // delta radius per frame for creating animation in que
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
+var view_scene                 = require('view_scene');
 var player                     = require('player');
 var wm                         = require('window_manager');
 var process                    = require('process');
 var scene;
-var player_multi_touch = [];
-var initial_pointer_id=[];
-var pointers_pressed=[];
+var player_pointer = [];
+var initial_pointer_id = [];
+var pointers_pressed = [];
 
 var ii = 0;
 while (ii < conf.players.max_players) {
-	player_multi_touch[ii] = [];
+	player_pointer[ii] = [];
 	initial_pointer_id[ii] = 0;
 	pointers_pressed[ii] = new process.semaphore(0);
 	ii++;
 }
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 module.exports.initial_pointer_id = initial_pointer_id;
 module.exports.pointers_pressed = pointers_pressed;
-
-var user = function(player_index, multi_touch_index, style) {
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function set_scene(sc) {
+	scene = sc;
+	scene.pointDownCapture.add(function (ev) {
+		var message = common_point_event(ev, 'down');
+		if (message === false) return;
+		var index = message.index;
+		var ev_sync = message.ev_sync;
+		var user = player_pointer[index.player][index.pointer];
+		if(user.pointer.tag.pointer_pressed) return; // check if pointer is already pressed.
+		down(index, ev_sync);
+		fire_other_local('pointer_other_local_down', index, ev_sync);
+	});
+	scene.pointMoveCapture.add(function (ev) {
+		var message = common_point_event(ev, 'move');
+		if (message === false) return;
+		var index = message.index;
+		var ev_sync = message.ev_sync;
+		var user = player_pointer[index.player][index.pointer];
+		if(!user.pointer.tag.pointer_pressed) {// resuming process
+			down(index, user.pointer.tag.last_ev);
+			fire_other_local('pointer_other_local_down', index, user.pointer.tag.last_ev);
+			return;
+		}
+		move(index, ev_sync);
+		fire_other_local('pointer_other_local_move', index, ev_sync);
+	});
+	scene.pointUpCapture.add(function (ev) {
+		// pointUP is an optional event under the unstable remote env.
+		// We should define an auto-pointUp event in this.pointer.update.add (not here). Ken Y.
+		var message = common_point_event(ev, 'up');
+		if (message === false) return;
+		var index = message.index;
+		// var ev_sync = message.ev_sync;
+		var user = player_pointer[index.player][index.pointer];
+		if(!user.pointer.tag.pointer_pressed) return; // check if pointer is already unpressed.
+		// unpressed process
+		up(index);
+		fire_other_local('pointer_other_local_up', index);
+	});
+}
+module.exports.set_scene = set_scene;
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var user = function(player_index, pointer_index, style) {
+	pointer_index = pointer_index === undefined ? 1 : pointer_index;
 	this.player_index = player_index;
-	this.multi_touch_index = (multi_touch_index === undefined ? 1 : multi_touch_index);
+	this.pointer_index = pointer_index;
 	var buffer = {current: que_length - 1, latest: que_length - 1, que: []};
 	this.buffer = buffer;
 	this.buffer.que[this.buffer.latest]	= {xy: {x: style.x, y: style.y}, time: g.game.age};
@@ -47,11 +89,12 @@ var user = function(player_index, multi_touch_index, style) {
 		scaleY: 1,
 		touchable: false,
 		hidden: false,
+		local: style.local,
 		tag: {
 			type: 'absolute',
 			last_ev: undefined,
 			player_index: player_index,
-			multi_touch_index: (multi_touch_index === undefined ? 1 : multi_touch_index),
+			pointer_index: pointer_index,
 			last_timestamp: g.game.age,
 			pointer_pressed: false,
 		},
@@ -99,7 +142,7 @@ var user = function(player_index, multi_touch_index, style) {
 	});
 	this.pointer.append(this.name_background);
 	this.pointer.append(this.name);
-	player_multi_touch[player_index][this.multi_touch_index] = this;
+	player_pointer[player_index][this.pointer_index] = this;
 
 	var pointer_move = new g.E({
 		scene: scene,
@@ -111,6 +154,7 @@ var user = function(player_index, multi_touch_index, style) {
 		scaleY: 1,
 		touchable: false,
 		hidden: true,
+		local: style.local,
 	});
 	var arrow_move = new g.Sprite({
 		scene: scene,
@@ -159,25 +203,25 @@ var user = function(player_index, multi_touch_index, style) {
 	scene.append(this.pointer);
 
 	this.pointer.update.add(function() {
-		if (pointer.tag.pointer_pressed) {
-			if ((pointer.tag.last_timestamp + g.game.age) % g.game.fps == 0) {
-				if(pointer.tag.last_timestamp + timeout_delta_frame < g.game.age) {
-					var player_index = pointer.tag.player_index;
-					update_by_operation('off', player_index, undefined);
-					var touch_index = pointer.tag.multi_touch_index;
-					var user = player_multi_touch[player_index][touch_index];
-					// unpressed process
-					user.pointer.tag.pointer_pressed = false;
-					pointers_pressed[player_index].wait();
-					if (touch_index != initial_pointer_id[player_index]) user.pointer.hide();
-				}
-			}
-		}
+		if (!pointer.tag.pointer_pressed) return;
+		if ((pointer.tag.last_timestamp + g.game.age) % g.game.fps != 0) return;
+		if (pointer.tag.last_timestamp + timeout_delta_frame >= g.game.age) return;
+		// unpressed process
+		var index = {
+			player: pointer.tag.player_index,
+			pointer: pointer.tag.pointer_index,
+		};
+		update_by_operation('off', index.player, undefined);
+		up(index);
+		// fire_other_local('pointer_other_local_up', index);
+	});
+	this.pointer.update.add(function() {
 		if (buffer.current == buffer.latest) {
+			if (!pointer_move.visible()) return;
 			pointer_move.hide();
 			return;
 		}
-		pointer_move.show();
+		if (!pointer_move.visible()) pointer_move.show();
 		var a = buffer.latest - buffer.current;
 		a = (a < 0 ? a + que_length : a);
 		a = (a > start_in_hurry ? 3 : 1);
@@ -196,37 +240,28 @@ function update_by_operation (status, player_index, player_id) {
 	if (player_index === false) return false;
 	status = (g.game.player.id == player.current[player_index].id ? 'operation_' + status : status);
 	wm.draw_modified(
-		player_multi_touch[player_index][initial_pointer_id[player_index]].name_background,
+		player_pointer[player_index][initial_pointer_id[player_index]].name_background,
 		conf.window_icon.pointer.background[status]);
 	return player_index;
 }
 module.exports.update_by_operation = update_by_operation;
-
-function get_absolute_position(ev) {
-	if (ev.target === undefined)    return {x: ev.point.x, y: ev.point.y};
-	if (ev.target.parent === scene) return {x: ev.point.x + ev.target.x, y: ev.point.y + ev.target.y};
-	return {
-		x: ev.point.x + ev.target.x + ev.target.parent.x,
-		y: ev.point.y + ev.target.y + ev.target.parent.y
-	};
-}
-
 function set_name_background(ops, player_index) {
-	wm.draw_modified( // direct update is required, not called update_by_operation('off', player_index, undefined);
-		player_multi_touch[player_index][initial_pointer_id[player_index]].name_background,
+	wm.draw_modified(
+		// direct update is required, not called update_by_operation('off', player_index, undefined);
+		player_pointer[player_index][initial_pointer_id[player_index]].name_background,
 		conf.window_icon.pointer.background['off']);
 }
 module.exports.set_name_background = set_name_background;
-
 function initial_pressed(player_index, ev) {
 	pointers_pressed[player_index].signal();
 	var xy = get_absolute_position(ev);
-	var touch_index = (ev.pointerId > conf.window.max_multi_touch ? -1 : ev.pointerId);
-	var user = player_multi_touch[player_index][touch_index];
+	var pointer_index = (ev.pointerId > conf.window.max_pointers ? -1 : ev.pointerId);
+	var user = player_pointer[player_index][pointer_index];
 	if (pointers_pressed[player_index].get_value() == 1){
-		set_name_background('off', player_index); // direct update is required, not called update_by_operation('off', player_index, undefined);
-		player_multi_touch[player_index][initial_pointer_id[player_index]].pointer.hide();
-		initial_pointer_id[player_index] = touch_index;
+		// direct update is required, not called update_by_operation('off', player_index, undefined);
+		set_name_background('off', player_index);
+		player_pointer[player_index][initial_pointer_id[player_index]].pointer.hide();
+		initial_pointer_id[player_index] = pointer_index;
 		update_by_operation('on', player_index, undefined);
 		quing_moveTo(xy, user);
 	}
@@ -235,75 +270,105 @@ function initial_pressed(player_index, ev) {
 	user.pointer.modified();
 }
 
-function set_last_status(pointer_pressed, player_index, ev, group) {
+function set_last_status(pointer_pressed, ev, group) {
+	// assumed that all values are not undefined
 	group.tag.last_ev = {
-		point: {
-			x: group.x + (ev.prevDelta === undefined ? 0 : ev.prevDelta.x),
-			y: group.y + (ev.prevDelta === undefined ? 0 : ev.prevDelta.y),
-		},
-		// x: group.x,
-		// y: group.y,
 		pointerId: ev.pointerId,
-		startDelta: {//require optimization
-			x: (ev.startDelta === undefined ? 0 : ev.startDelta.x),
-			y: (ev.startDelta === undefined ? 0 : ev.startDelta.y)
+		point: {
+			x: group.x + ev.prevDelta.x,
+			y: group.y + ev.prevDelta.y,
+		},
+		prevDelta: {
+			x: ev.prevDelta.x,
+			y: ev.prevDelta.y,
+		},
+		startDelta: {
+			x: ev.startDelta.x,
+			y: ev.startDelta.y
 		},
 	};
 	group.tag.last_timestamp = g.game.age;
 	group.tag.pointer_pressed = pointer_pressed;
 }
 
-function set_scene(sc) {
-	scene = sc;
-	scene.pointDownCapture.add(function (ev) {
-		if (!player.validate(ev.player)) return;
-		var player_index = player.find_index(ev.player.id);
-		var touch_index = (ev.pointerId > conf.window.max_multi_touch ? -1 : ev.pointerId);
-		if (touch_index == -1) return;
-		var user = player_multi_touch[player_index][touch_index];
-		set_last_status(true, player_index, ev, user.pointer);// required here
-		initial_pressed(player_index, ev);
-	});
-	scene.pointMoveCapture.add(function (ev) {
-		if (!player.validate(ev.player)) return;
-		var touch_index = (ev.pointerId > conf.window.max_multi_touch ? -1 : ev.pointerId);
-		if (touch_index == -1) return;
-		var player_index = player.find_index(ev.player.id);
-		var user = player_multi_touch[player_index][touch_index];
-		if(!user.pointer.tag.pointer_pressed) {// resuming process
-			set_last_status(true, player_index, ev, user.pointer);// required here
-			initial_pressed(player_index, user.pointer.tag.last_ev);
-			return;
-		}
-		set_last_status(true, player_index, ev, user.pointer);
-		user.pointer.moveBy(ev.prevDelta.x, ev.prevDelta.y);
-		user.pointer.modified();
-		quing_fast_moveBy(ev.prevDelta, user);
-		// if (!wm.view.floating) return;
-		// wm.move_view(ev.prevDelta.x, ev.prevDelta.y);
-	});
-	scene.pointUpCapture.add(function (ev) {
-		// pointUP is an optional event under the unstable remote env.
-		// We should define an auto-pointUp event in this.pointer.update.add (not here). Ken Y.
-		if (!player.validate(ev.player)) return;
-		var player_index = update_by_operation('off', undefined, ev.player.id);
-		var touch_index = (ev.pointerId > conf.window.max_multi_touch ? -1 : ev.pointerId);
-		if (touch_index == -1) return;
-		var user = player_multi_touch[player_index][touch_index];
-		if(!user.pointer.tag.pointer_pressed) return; // check if pointer is already unpressed.
-		// unpressed process
-		user.pointer.tag.pointer_pressed = false;
-		pointers_pressed[player_index].wait();
-		if (touch_index != initial_pointer_id[player_index]) user.pointer.hide();
-	});
+function common_point_event(ev, point_event) {
+	var norm_function = {down: view_scene.sync_from_local_down, move: view_scene.sync_from_local, up: view_scene.sync_from_local};
+	if (!player.validate(ev.player)) return false;
+	if (ev.pointerId > conf.window.max_pointers) return false;
+	var xy = get_absolute_position(ev);
+	ev.point.x = xy.x;
+	ev.point.y = xy.y;
+	return {
+		index: {
+			player: player.find_index(ev.player.id),
+			pointer: ev.pointerId,
+		},
+		ev_sync: norm_function[point_event](ev),
+	};
 }
-module.exports.set_scene = set_scene;
 
+function other_local_down(message) {
+	// pointer_other_local_down as destination in message event in window_manager.js
+	var index = message.data.index;
+	var ev = message.data.ev;
+	if (index.player === player.find_index(ev.player.id)) return;
+	down(index, ev);
+}
+module.exports.other_local_down = other_local_down;
+function other_local_move(message) {
+	// pointer_other_local_move as destination in message event in window_manager.js
+	var index = message.data.index;
+	var ev = message.data.ev;
+	if (index.player === player.find_index(ev.player.id)) return;
+	move(index, ev);
+}
+module.exports.other_local_move = other_local_move;
+function other_local_up(message) {
+	// pointer_other_local_up as destination in message event in window_manager.js
+	var index = message.data.index;
+	var ev = message.data.ev;
+	if (index.player === player.find_index(ev.player.id)) return;
+	up(message.data.index);
+}
+module.exports.other_local_up = other_local_up;
+
+function down(index, ev) {
+	set_last_status(true, ev, player_pointer[index.player][index.pointer].pointer);
+	initial_pressed(index.player, ev);
+}
+function move(index, ev) {
+	var user = player_pointer[index.player][index.pointer];
+	set_last_status(true, ev, user.pointer);
+	user.pointer.moveBy(ev.prevDelta.x, ev.prevDelta.y);
+	user.pointer.modified();
+	quing_fast_moveBy(ev.prevDelta, user);
+}
+function up(index) {
+	var user = player_pointer[index.player][index.pointer];
+	user.pointer.tag.pointer_pressed = false;
+	pointers_pressed[index.player].wait();
+	update_by_operation('off', index.player, undefined); // check later
+	if (index.pointer != initial_pointer_id[index.player]) user.pointer.hide();
+}
+
+function fire_other_local(function_name, index, ev) {
+	// index.player = 1; // test, should consider ev.delta zero is different between 0 and 1
+	var mes = {
+		data: {
+			destination: function_name,
+			index: index,
+			ev: ev,
+		}
+	};
+	// scene.message.fire(mes);
+	return mes;
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Quing buffer
 function quing_moveTo(xy, user) {
 	var xy0 = user.buffer.que[user.buffer.latest].xy;
 	quing_moveBy({x: xy.x - xy0.x, y: xy.y - xy0.y}, user);
 }
-
 function quing_moveBy(xy, user) {
 	var current_time = g.game.age;
 	var dx = xy.x;
@@ -327,12 +392,16 @@ function quing_moveBy(xy, user) {
 function quing_fast_moveBy(xy, user) {
 	var current_time = g.game.age;
 	var xy0 = user.buffer.que[user.buffer.latest].xy;
-	if (user.buffer.current == user.buffer.latest) {
-		user.buffer.latest = (user.buffer.latest + 1) % que_length;
-		user.buffer.current = user.buffer.latest;
-	}
-	else {
-		user.buffer.latest = (user.buffer.latest + 1) % que_length;
-	}
+	user.buffer.latest = (user.buffer.latest + 1) % que_length;
+	if (user.buffer.current == user.buffer.latest) user.buffer.current = (user.buffer.current + 1) % que_length;
 	user.buffer.que[user.buffer.latest] = {xy: {x: xy0.x + xy.x, y: xy0.y + xy.y}, time: current_time};
+}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function get_absolute_position(ev) {
+	if (ev.target === undefined)    return {x: ev.point.x, y: ev.point.y};
+	if (ev.target.parent === scene) return {x: ev.point.x + ev.target.x, y: ev.point.y + ev.target.y};
+	return {
+		x: ev.point.x + ev.target.x + ev.target.parent.x,
+		y: ev.point.y + ev.target.y + ev.target.parent.y
+	};
 }

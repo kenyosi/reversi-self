@@ -70,6 +70,7 @@ module.exports.pile_area = pile_area;
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Players
+var local_feature = false;
 module.exports.players = {
 	max_players: 2,
 	admin : [true, false, false, false],
@@ -81,16 +82,16 @@ module.exports.players = {
 	],
 	window_pointer: [
 		{text: 'P1', x: cs[15] + 8, y: cs[1] + 14, width: cs[2], height: cs[2], fontSize: 30, textColor: '#0062ff',
-			arrow:{srcX:  1, srcY: 130, width: 12, height: 12},
+			arrow:{srcX:  1, srcY: 130, width: 12, height: 12}, local: local_feature,
 		},
 		{text: 'P2', x: cs[15] + 8, y: cs[5] + 27, width: cs[2], height: cs[2], fontSize: 30, textColor: '#ff0000',
-			arrow:{srcX: 17, srcY: 130, width: 12, height: 12},
+			arrow:{srcX: 17, srcY: 130, width: 12, height: 12}, local: local_feature,
 		},
 		{text: 'P3', x: cs[10] + 8, y: cs[5] + 27, width: cs[2], height: cs[2], fontSize: 30, textColor: '#00ff00',
-			arrow:{srcX: 33, srcY: 130, width: 12, height: 12},
+			arrow:{srcX: 33, srcY: 130, width: 12, height: 12}, local: local_feature,
 		},
 		{text: 'P4', x: cs[08] + 8, y: cs[5] + 27, width: cs[2], height: cs[2], fontSize: 30, textColor: '#ff00ff',
-			arrow:{srcX: 49, srcY: 130, width: 12, height: 12},
+			arrow:{srcX: 49, srcY: 130, width: 12, height: 12}, local: local_feature,
 		},
 	],
 	cell: {
@@ -261,7 +262,8 @@ module.exports.game_icon = game_icon;
 
 var window = {
 	max_prevDelta: cs[2] * cs[2], // per frame
-	max_multi_touch: 16,          // per player
+	// max_multi_touch: 16,          // per player
+	max_pointers: 16,          // per player
 	max_multi_operation: 1,       // per player
 };
 module.exports.window = window;
