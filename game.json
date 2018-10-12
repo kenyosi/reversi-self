@@ -9,12 +9,6 @@
 			"path": "script/main.js",
 			"global": true
 		},
-		"othello_disk": {
-			"type": "image",
-			"width": 224,
-			"height": 32,
-			"path": "image/othello_disk.png"
-		},
 		"config": {
 			"type": "script",
 			"path": "script/config.js",
@@ -107,6 +101,12 @@
 			"width": 640,
 			"height": 480,
 			"path": "image/help_screen_solo.png"
+		},
+		"reversi_disk": {
+			"type": "image",
+			"width": 224,
+			"height": 32,
+			"path": "image/reversi_disk.png"
 		}
 	},
 	"environment": {

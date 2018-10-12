@@ -27,7 +27,12 @@ module.exports = {
             "error",
             "always"
         ],
-        "no-unused-vars": ["error", { "vars": "all", "args": "after-used", "ignoreRestSiblings": false }],
+        "no-unused-vars": [
+            "error", {
+                "vars": "all",
+                "args": "after-used",
+                "ignoreRestSiblings": false
+        }],
         "eol-last": [
             "error",
             "always"
