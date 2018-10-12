@@ -207,7 +207,6 @@ module.exports.help_board = help_board;
 // confirm board
 var window_manager_confirm = {
 	height: 32 * 3,
-	// width: g.game.width - 32,
 	width: 32 * 5,
 	label: {
 		cssColor: 'black',
@@ -223,7 +222,6 @@ var window_manager_confirm = {
 	],
 };
 module.exports.window_manager_confirm = window_manager_confirm;
-
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Comment

@@ -22,10 +22,8 @@ while (i < 20) {
 	cell_size_array[i] = i * conf.board.cell.size.x;
 	i++;
 }
-
 var cell_size_x_m_1            = conf.board.cell.size.x - 1;
 var cell_size_y_m_1            = conf.board.cell.size.y - 1;
-
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
