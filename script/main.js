@@ -8,13 +8,13 @@ var conf                       = require('config');
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
-// var commenting                 = require('commenting');
 var player                     = require('player');
-var piece                       = require('piece');
+var piece                      = require('piece');
 var stack                      = require('object_group');
 var wm                         = require('window_manager');
-// var confirm                    = require('confirm');
 var set_inital_locations       = require('set_initial_locations');
+
+player.init();
 
 var cell_size_array            = [];
 var i = 0;
@@ -22,26 +22,17 @@ while (i < 20) {
 	cell_size_array[i] = i * conf.board.cell.size.x;
 	i++;
 }
-
 var cell_size_x_m_1            = conf.board.cell.size.x - 1;
 var cell_size_y_m_1            = conf.board.cell.size.y - 1;
 
-var caster_joined              = false;
-g.game.join.add(function (ev) {
-	var player_index = 0;
-	if (!caster_joined) {
-		player.current[player_index] = player.new_propoeties(ev.player, player_index, g.game.age);
-		caster_joined = true;
-	}
-});
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 function main() {
-	var scene = new g.Scene({game: g.game, assetIds: ['othello_disk', 'window_manager_icons', 'help_screen', 'help_screen_solo']});
-	wm.set_scene(scene);         		    // set window manager in scene
-	stack.set_scene(scene);				    // set stack disks in scene
-	piece.set_scene(scene);				    // set disks in scene
+	var scene = new g.Scene({game: g.game, assetIds: ['reversi_disk', 'window_manager_icons', 'help_screen', 'help_screen_solo']});
+	wm.set_scene(scene);         		      // set window manager in scene
+	stack.set_scene(scene);				      // set stack disks in scene
+	piece.set_scene(scene);				      // set disks in scene
 	scene.loaded.add(function () { // ev is for future use
-		// wm.move_view(0, -conf.help_board.scroll_height);
 		// Pile areas
 		var pile_areas = [];
 		var lines_in_pile = 2;
@@ -100,7 +91,7 @@ function main() {
 					height: cell_size_y_m_1,
 					piece: {
 						scene: scene,
-						src: scene.assets['othello_disk'],
+						src: scene.assets['reversi_disk'],
 						opacity: conf.disk.bw[jj].opacity,
 						width: cell_size_x_m_1,
 						height: cell_size_y_m_1,
@@ -142,7 +133,6 @@ function main() {
 
 		// Create window manager
 		scene.setTimeout(function() {wm.create();}, 100);
-
 	});
 	g.game.pushScene(scene);
 }

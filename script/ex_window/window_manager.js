@@ -71,7 +71,7 @@ function set_scene(sc) {
 	confirm.set_scene(scene);
 	// commenting.set_scene(scene); 		// set destination of comment
 	help.set_scene(scene, view);
-	// Messaging event
+	// Messaging events
 	scene.message.add(function(mes) {
 		events[mes.data.destination](mes);
 	});
@@ -144,6 +144,14 @@ function createPlayAgainControl(x, y, w, h, style, confirm_object) {
 				scene.clearInterval(confirm_interval);
 				// after confirmation
 				if (!confirm.point_up.result) return;// commenting.post('操作を取り消します');
+				// initialize semaphoe in @self
+				var ii = 0;
+				while(ii < conf.players.max_players) {
+					player_operations[ii].set_value(conf.window.max_multi_operation); // inital value
+					pointer.pointers_pressed[ii].set_value(0);                        // inital value
+					ii++;
+				}
+				// initialize pieces in game specific
 				set_inital_locations.pieces(scene);
 			}
 		}, 100);
@@ -204,7 +212,6 @@ function create() {
 		pointer.update_by_operation('on', player_index, undefined);
 		++player_index;
 	}
-	help.create_board(conf.help_board, 0, 0);
 	player_index = player.find_index(g.game.player.id);
 }
 module.exports.create = create;
