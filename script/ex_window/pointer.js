@@ -11,7 +11,7 @@ var timeout_delta_frame        = 3   * g.game.fps;
 var drpf                       = 7; // delta radius per frame for creating animation in que
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
-var view_scene                 = require('view_scene');
+// var local_scene                 = require('local_scene');
 var player                     = require('player');
 var wm                         = require('window_manager');
 var process                    = require('process');
@@ -33,20 +33,23 @@ module.exports.pointers_pressed = pointers_pressed;
 function set_scene(sc) {
 	scene = sc;
 	scene.pointDownCapture.add(function (ev) {
-		var message = common_point_event(ev, 'down');
+		// console.log(wm.local_scene_player);
+		var message = common_point_event(ev);
 		if (message === false) return;
 		var index = message.index;
-		var ev_sync = message.ev_sync;
+		// var ev_sync = message.ev_sync;
+		var ev_sync = wm.local_scene_player[index.player].global_from_local_down(ev);
 		var user = player_pointer[index.player][index.pointer];
 		if(user.pointer.tag.pointer_pressed) return; // check if pointer is already pressed.
 		down(index, ev_sync);
 		fire_other_local('pointer_other_local_down', index, ev_sync);
 	});
 	scene.pointMoveCapture.add(function (ev) {
-		var message = common_point_event(ev, 'move');
+		var message = common_point_event(ev);
 		if (message === false) return;
 		var index = message.index;
-		var ev_sync = message.ev_sync;
+		// var ev_sync = message.ev_sync;
+		var ev_sync = wm.local_scene_player[index.player].global_from_local(ev);
 		var user = player_pointer[index.player][index.pointer];
 		if(!user.pointer.tag.pointer_pressed) {// resuming process
 			down(index, user.pointer.tag.last_ev);
@@ -59,10 +62,11 @@ function set_scene(sc) {
 	scene.pointUpCapture.add(function (ev) {
 		// pointUP is an optional event under the unstable remote env.
 		// We should define an auto-pointUp event in this.pointer.update.add (not here). Ken Y.
-		var message = common_point_event(ev, 'up');
+		var message = common_point_event(ev);
 		if (message === false) return;
 		var index = message.index;
 		// var ev_sync = message.ev_sync;
+		// var ev_sync = wm.local_scene_player[index.player].global_from_local(ev);
 		var user = player_pointer[index.player][index.pointer];
 		if(!user.pointer.tag.pointer_pressed) return; // check if pointer is already unpressed.
 		// unpressed process
@@ -291,19 +295,20 @@ function set_last_status(pointer_pressed, ev, group) {
 	group.tag.pointer_pressed = pointer_pressed;
 }
 
-function common_point_event(ev, point_event) {
-	var norm_function = {down: view_scene.sync_from_local_down, move: view_scene.sync_from_local, up: view_scene.sync_from_local};
+function common_point_event(ev) {
+	// var norm_function = {down: local_scene.sync_from_local_down, move: local_scene.sync_from_local, up: local_scene.sync_from_local};
 	if (!player.validate(ev.player)) return false;
+	var player_id = player.find_index(ev.player.id);
 	if (ev.pointerId > conf.window.max_pointers) return false;
 	var xy = get_absolute_position(ev);
 	ev.point.x = xy.x;
 	ev.point.y = xy.y;
 	return {
 		index: {
-			player: player.find_index(ev.player.id),
+			player: player_id,
 			pointer: ev.pointerId,
 		},
-		ev_sync: norm_function[point_event](ev),
+		// ev_sync: norm_function[point_event](ev),
 	};
 }
 

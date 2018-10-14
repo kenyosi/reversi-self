@@ -25,6 +25,7 @@ var help                       = require('help');
 var statusbar                  = require('statusbar');
 var confirm                    = require('confirm');
 var set_inital_locations       = require('set_initial_locations');
+var local_scene                = require('local_scene');
 var semaphoe                   = new process.semaphore(1);
 
 var player_operations = [];
@@ -35,16 +36,15 @@ while (ii < conf.players.max_players) {
 }
 var scene;
 var admin = admin_control.admin;
-var index_pp                   = [];
 var cell_size_array            = [];
 var i = 0;
 while (i < 20) {
-	index_pp[i]        = (i + 1).toString();
 	cell_size_array[i] = i * conf.board.cell.size.x;
 	i++;
 }
 
 var login_controls             = [];
+var local_scene_player = [];
 var status_bottom;
 // var stack_objects              = [];
 var player_objects;
@@ -61,7 +61,6 @@ var events = {
 module.exports.events = events;
 module.exports.view              = view;
 module.exports.admin             = admin;
-module.exports.index_pp          = index_pp;
 module.exports.semaphoe          = semaphoe;
 module.exports.player_operations = player_operations;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -100,7 +99,8 @@ function createLoginControl(target_player_index, x, y, w, h, style, confirm_obje
 	var name = new g.Label({
 		scene: scene,
 		font: conf.default_font,
-		text: 'P' + index_pp[group.tag.target_player_index],
+		// text: 'P' + index_pp[group.tag.target_player_index],
+		text: player.head[group.tag.target_player_index],
 		fontSize: 14,
 		textColor:  '#000000',
 		x: 0,
@@ -112,7 +112,8 @@ function createLoginControl(target_player_index, x, y, w, h, style, confirm_obje
 		if (!semaphoe.status()) return;
 		if (!player.validate_join(ev.player, 1)) return;
 		if (!player.is_login(1)) return;
-		if (!confirm_object.show('P' + index_pp[group.tag.target_player_index] + 'を退席させます')) return;
+		// if (!confirm_object.show('P' + index_pp[group.tag.target_player_index] + 'を退席させます')) return;
+		if (!confirm_object.show(player.head[group.tag.target_player_index] + 'を退席させます')) return;
 		var confirm_interval = scene.setInterval(function () {
 			if (semaphoe.status()) {
 				// after confirmation
@@ -210,11 +211,15 @@ function create() {
 		var p = new pointer.user(player_index, 0, conf.players.window_pointer[player_index]);
 		pointer_login[player_index] = p.pointer.children[1];
 		pointer.update_by_operation('on', player_index, undefined);
+		local_scene_player[player_index] = new local_scene.player(player_index);
 		++player_index;
 	}
 	player_index = player.find_index(g.game.player.id);
+	// console.log(local_scene_player[0]);
+	module.exports.local_scene_player = local_scene_player;
 }
 module.exports.create = create;
+module.exports.local_scene_player = local_scene_player;
 
 function eInE (e0, e1, f) {
 	f = (f === undefined ? [0, 0, 0, 0] : f);

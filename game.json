@@ -102,16 +102,16 @@
 			"height": 480,
 			"path": "image/help_screen_solo.png"
 		},
-		"view_scene": {
-			"type": "script",
-			"path": "script/ex_window/view_scene.js",
-			"global": true
-		},
 		"reversi_disk": {
 			"type": "image",
 			"width": 224,
 			"height": 32,
 			"path": "image/reversi_disk.png"
+		},
+		"local_scene": {
+			"type": "script",
+			"path": "script/ex_window/local_scene.js",
+			"global": true
 		}
 	},
 	"environment": {

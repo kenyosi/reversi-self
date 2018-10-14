@@ -12,10 +12,8 @@ var wm                         = require('window_manager');
 var player                     = require('player');
 var scene;
 var cell_size_array            = [];
-var index_pp                   = [];
 var i = 0;
 while (i < 20) {
-	index_pp[i]        = (i + 1).toString();
 	cell_size_array[i] = i * conf.board.cell.size.x;
 	i++;
 }

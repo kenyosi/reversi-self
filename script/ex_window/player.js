@@ -5,7 +5,6 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Configuration
 var conf                       = require('config');
-var status_bar_messages = ['あなたはP1です'];
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
 // var commenting                 = require('commenting');
@@ -21,31 +20,31 @@ var validate_index = [
 	{st: 1, en: 2},                        // player 2 only
 	{st: 2, en: 3},                        // player 3 only
 ];
-
 var ii = 0;
+var status_bar_messages = [];
+var head = [];
 while (ii < conf.players.max_players) {
-	status_bar_messages[ii] = 'あなたはP' + ii + 'です';
+	var ip = (ii + 1).toString();
+	head[ii] = 'P' + ip;
+	status_bar_messages[ii] = 'あなたは' + head[ii] + 'です';
 	ii++;
 }
 ii = 1;
 while (ii < conf.players.max_players) {
-	var ip = (ii + 1).toString();
-	status_bar_messages[ii] = 'あなたはP' + ip + 'です';
-	current [ii]            = {id: '-9999', name: '', head: 'Player' + ip + ': 募集します', timestamp: conf.const.old_unix_time, time_warning: 0, player_plate: 0, player_plate_status: 0, login: false, group: 'user'},
+	current [ii]            = {id: '-9999', name: '', head: head[ii] + ': 募集します', timestamp: conf.const.old_unix_time, time_warning: 0, player_plate: 0, player_plate_status: 0, login: false, group: 'user'},
 	validate_index[ii + 1]  = {st: ii - 1, en: ii};
 	ii++;
 }
-
 var caster_joined              = false;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+module.exports.head            = head;
 module.exports.current         = current;
 
 function init() {
 	g.game.join.add(function (ev) {
 		var player_index = 0;
 		if (!caster_joined) {
-		// player.current[player_index] = player.new_propoeties(ev.player, player_index, g.game.age);
 			current[player_index] = new_propoeties(ev.player, player_index, g.game.age);
 			caster_joined = true;
 		}
@@ -207,10 +206,8 @@ module.exports.get_group = get_group;
 function new_propoeties(player, player_index, timestamp) {
 	return {
 		id: player.id,
-		// name: player.name,
-		// head: 'Player' + wm.index_pp[player_index] + ': ' + player.name.substr(0, 2),
-		name: 'Player' + wm.index_pp[player_index],
-		head: 'Player' + wm.index_pp[player_index] + ': 参加中',
+		name: head[player_index],
+		head: head[player_index] + ': 参加中',
 		timestamp: timestamp,
 		time_warning: conf.players.default[player_index].time_warning,
 		player_plate: conf.players.default[player_index].player_plate,
