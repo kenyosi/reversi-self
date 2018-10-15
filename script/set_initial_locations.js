@@ -27,7 +27,7 @@ function pieces (scene) {
 		var ii = 0;
 		var length_status = piece.status.length;
 		while (ii < length_status) {
-			var gid = piece.disk_id[ii];
+			var gid = piece.group_id[ii];
 			piece.status[gid].pointdown.processed[jj].set_value(0);
 			ii++;
 		}
@@ -35,19 +35,19 @@ function pieces (scene) {
 	}
 	// Create empty pile areas
 	var length_stack_objects = stack_objects.length;
-	for (var i = 0; i < length_stack_objects; i++) stack_objects[i].disk_id = [];
+	for (var i = 0; i < length_stack_objects; i++) stack_objects[i].group_id = [];
 	// Restore initial location and black and white
 	ii = 0;
-	while(ii < conf.disk.n) {
+	while(ii < conf.piece.n) {
 		var pp = scene.children[piece.index[ii]];
 		var pv = initial_object_locations[ii];
 		pp.x   = pv.x;
 		pp.y   = pv.y;
 		pp.tag = pv.tag;
-		wm.draw_modified(pp.children[0], conf.disk.unselect.background);
-		//Fill disks in pile areas
-		var dp = indTo2D(ii, [conf.pile_area.max_disks]);
-		stack_objects[dp[1]].set_disk(pp, false, false);
+		wm.draw_modified(pp.children[0], conf.piece.unselect.background);
+		//Fill pieces in pile areas
+		var dp = indTo2D(ii, [conf.pile_area.max_pieces]);
+		stack_objects[dp[1]].set_piece(pp, false, false);
 		ii++;
 	}
 }

@@ -47,7 +47,7 @@ var board = {
 module.exports.board = board;
 
 var pile_area = {
-	max_disks: 16,
+	max_pieces: 16,
 	background: {cssColor: 'black',   opacity: 0.75},
 	location : {
 		x0:     cs[15] - 0.2 * cs[1],
@@ -58,9 +58,9 @@ var pile_area = {
 };
 module.exports.pile_area = pile_area;
 
-// Disk
+// Piece
 var view_angle    = 10;
-var disk = {
+var piece = {
 	n: 64,
 	bw_n: 2,
 	unselect: {
@@ -101,7 +101,7 @@ var disk = {
 		}
 	],
 };
-module.exports.disk = disk;
+module.exports.piece = piece;
 
 var game_icon = {
 	destruct:{

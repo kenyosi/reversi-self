@@ -262,8 +262,8 @@ function move_view(dx, dy) {
 	// 	var sbl1 = stack_object.length;
 	// 	var jj = 0;
 	// 	while (jj < sbl1) {
-	// 		stack_object.disk_id[jj].x += dx;
-	// 		stack_object.disk_id[jj].y += dy;
+	// 		stack_object.group_id[jj].x += dx;
+	// 		stack_object.group_id[jj].y += dy;
 	// 		++jj;
 	// 	}
 	// 	++ii;
@@ -294,7 +294,7 @@ function zoom_view(factor) {
 	// 	var sbl1 = stack_object.length;
 	// 	var jj = 0;
 	// 	while (jj < sbl1) {
-	// 		var rr = stack_object.disk_id[jj];
+	// 		var rr = stack_object.group_id[jj];
 	// 		rr.x = rr.x + (factor < 1 ? -rr.width / 4  : +rr.width / 2);
 	// 		rr.y = rr.y + (factor < 1 ? -rr.height / 4  : +rr.height / 2);
 	// 		rr.scaleX *= factor;

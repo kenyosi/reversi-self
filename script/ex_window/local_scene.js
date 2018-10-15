@@ -38,15 +38,15 @@ player.prototype.set_rotate_matrix_vector = function (r) {
 		forward: {
 			matrix: [[cos_sx, -sin_sy], [sin_sx, cos_sy]],
 			vector: [
-				-( cos_sx * zc[0] - sin_sy * zc[1]) + this.loal_center.x,
-				-( sin_sx * zc[0] + cos_sy * zc[1]) + this.loal_center.y
+				-( cos_sx * zc[0] - sin_sy * zc[1]) + this.local_center.x,
+				-( sin_sx * zc[0] + cos_sy * zc[1]) + this.local_center.y
 			],
 		},
 		inverse: {
 			matrix: [[cos_ix, +sin_iy], [-sin_ix, cos_iy]],
 			vector: [
-				-( cos_ix * this.local_center.x  + sin_iy * this.local_center.y) + zc[0],
-				-(-sin_ix * this.local_.center.x + cos_iy * this.local_center.y) + zc[1]
+				-( cos_ix * this.local_center.x + sin_iy * this.local_center.y) + zc[0],
+				-(-sin_ix * this.local_center.x + cos_iy * this.local_center.y) + zc[1]
 			],
 		},
 	};

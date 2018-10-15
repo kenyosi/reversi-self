@@ -29,9 +29,9 @@ var cell_size_y_m_1            = conf.board.cell.size.y - 1;
 
 function main() {
 	var scene = new g.Scene({game: g.game, assetIds: ['reversi_disk', 'window_manager_icons', 'help_screen', 'help_screen_solo']});
-	wm.set_scene(scene);         		      // set window manager in scene
-	stack.set_scene(scene);				      // set stack disks in scene
-	piece.set_scene(scene);				      // set disks in scene
+	wm.set_scene(scene);
+	stack.set_scene(scene);
+	piece.set_scene(scene);
 	scene.loaded.add(function () { // ev is for future use
 		// Pile areas
 		var pile_areas = [];
@@ -40,7 +40,7 @@ function main() {
 		var dy = 4.0 * cell_size_array[1] + 12;
 		var ii = 0;
 		var flags = [[1, 0, 0, 0], [0, 1, 0, 0]];
-		while(ii < conf.disk.bw_n * lines_in_pile) {
+		while(ii < conf.piece.bw_n * lines_in_pile) {
 			var x_rem = ii % lines_in_pile;
 			var nx    = (ii - x_rem) / lines_in_pile;
 			pile_areas[ii] = new stack.objects(
@@ -58,7 +58,7 @@ function main() {
 
 		// Board area
 		ii = 0;
-		while (ii < conf.disk.n) {
+		while (ii < conf.piece.n) {
 			var xy = indTo2D(ii, conf.board.size.x);
 			scene.append(
 				createBoard(
@@ -70,19 +70,19 @@ function main() {
 			++ii;
 		}
 
-		// Disks in pile areas
-		var disks_pp      = conf.disk.n / conf.disk.bw_n;
-		var disks_in_line = disks_pp / lines_in_pile;
+		// pieces in pile areas
+		var pieces_pp      = conf.piece.n / conf.piece.bw_n;
+		var pieces_in_line = pieces_pp / lines_in_pile;
 		var x0            = cell_size_array[15] - 0.2 * cell_size_array[1];
 		var y0            = cell_size_array[4] -6;
 		dx            = 1 + cell_size_array[1];
 		dy            = 6;
 		var jj = 0;
 		var index   = 0;
-		while(jj < conf.disk.bw_n) {
+		while(jj < conf.piece.bw_n) {
 			ii = 0;
-			while(ii < disks_pp) {
-				var dp = indTo2D(ii, [disks_in_line]);
+			while(ii < pieces_pp) {
+				var dp = indTo2D(ii, [pieces_in_line]);
 				var details = {
 					x: x0 + dp[1] * dx + wm.view.position.x,
 					y: y0 - dp[0] * dy + wm.view.position.y,
@@ -92,11 +92,11 @@ function main() {
 					piece: {
 						scene: scene,
 						src: scene.assets['reversi_disk'],
-						opacity: conf.disk.bw[jj].opacity,
+						opacity: conf.piece.bw[jj].opacity,
 						width: cell_size_x_m_1,
 						height: cell_size_y_m_1,
-						angle: conf.disk.bw[jj].in_pile.angle,
-						srcX: conf.disk.bw[jj].on_board.srcX,
+						angle: conf.piece.bw[jj].in_pile.angle,
+						srcX: conf.piece.bw[jj].on_board.srcX,
 						srcY: 0,
 						srcWidth: cell_size_x_m_1,
 						srcHeight: cell_size_y_m_1,
@@ -119,17 +119,17 @@ function main() {
 			jj++;
 		}
 
-		var initial_disk_locations = [];
-		ii = conf.disk.n - 1;
+		var initial_piece_locations = [];
+		ii = conf.piece.n - 1;
 		while (ii >= 0) {
-			dp = indTo2D(ii, conf.pile_area.max_disks);
+			dp = indTo2D(ii, conf.pile_area.max_pieces);
 			var pp = scene.children[piece.index[ii]];
-			pile_areas[dp[1]].set_disk(pp, false, false);
-			initial_disk_locations[ii] = {x: pp.x, y: pp.y, tag: pp.tag};
+			pile_areas[dp[1]].set_piece(pp, false, false);
+			initial_piece_locations[ii] = {x: pp.x, y: pp.y, tag: pp.tag};
 			--ii;
 		}
-		//Store initial disk locations and BW for restarting game
-		set_inital_locations.set_initial_object_locations(initial_disk_locations);
+		//Store initial piece locations and BW for restarting game
+		set_inital_locations.set_initial_object_locations(initial_piece_locations);
 
 		// Create window manager
 		scene.setTimeout(function() {wm.create();}, 100);

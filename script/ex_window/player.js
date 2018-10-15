@@ -186,7 +186,7 @@ function logout(player_index) {// mes is for posting comment (no use now)
 	var ii = 0;
 	var length_status = piece.status.length;
 	while (ii < length_status) {
-		var gid = piece.disk_id[ii];
+		var gid = piece.group_id[ii];
 		piece.status[gid].pointdown.processed[player_index].set_value(0);
 		ii++;
 	}

@@ -70,7 +70,7 @@
 // 		disk_stacking_state[player_index] = !disk_stacking_state[player_index];
 // 		if (disk_stacking_state[player_index]) {
 // 			wm.draw_modified(button, conf.players.item.operating[player_index]);
-// 			wm.draw_modified(disk.last[player_index].children[0], conf.disk.unselect.background);// unselect the last disk
+// 			wm.draw_modified(disk.last[player_index].children[0], conf.piece.unselect.background);// unselect the last disk
 // 			// mes = 'スタックモードにする@P' + wm.index_pp[player_index];
 // 		}
 // 		else {
@@ -259,7 +259,7 @@
 // 	var ij = [];
 // 	var counter = 0;
 // 	rn = g.game.random;
-// 	while (jj < conf.disk.n) {
+// 	while (jj < conf.piece.n) {
 // 		var d = scene.children[disk.index[jj]];
 // 		if(disk.get_address_in_board(d).validate) {
 // 			var xy = {

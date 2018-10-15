@@ -6,7 +6,7 @@
 // Configuration
 var conf                       = require('config');
 var board_cell_half_size       = {x: conf.board.cell.size.x / 2, y: conf.board.cell.size.y / 2};
-var n_disks0                   = conf.disk.n - 1;
+var n_piece0                   = conf.piece.n - 1;
 var timeout_delta_frame        = 3 * g.game.fps;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -17,18 +17,18 @@ var process                    = require('process');
 var player                     = require('player');
 var pointer                    = require('pointer');
 var wm                         = require('window_manager');
-var disk_id                    = [];
+var group_id                   = [];
 var index                      = [];
 var last                       = [];
 var pile_areas                 = [];
 var pile_areas_length;
-var status                     = {}; //for revierging disk detection
+var status                     = {}; //for revierging piece detection
 var camera_position_pointDown;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 module.exports.index           = index;
 module.exports.last            = last;
-module.exports.disk_id         = disk_id;
+module.exports.group_id         = group_id;
 module.exports.status          = status;
 
 function set_scene(sc) { scene = sc;}
@@ -98,8 +98,8 @@ function create(details) {
 	group.append(
 		new g.FilledRect({
 			scene: scene,
-			cssColor: conf.disk.unselect.background.cssColor,
-			opacity: conf.disk.unselect.background.opacity,
+			cssColor: conf.piece.unselect.background.cssColor,
+			opacity: conf.piece.unselect.background.opacity,
 			width: details.width,
 			height: details.height,
 		}));
@@ -146,7 +146,7 @@ function create(details) {
 		if (!status[group.id].pointdown.processed[player_index].status()) return;
 		if (!status[group.id].events.process.status()) return;
 		set_last_status(0, player_index, ev, group);
-		// force place disk if rapid movement. Check if this is required carefully.
+		// force place piece if rapid movement. Check if this is required carefully.
 		// var dxy = ev.prevDelta.x * ev.prevDelta.x + ev.prevDelta.y * ev.prevDelta.y
 		// if (dxy > conf.window.max_prevDelta || true) {
 		// place(ev, group);
@@ -184,7 +184,7 @@ function create(details) {
 		place(ev, group, player_index);
 	});
 	scene.append(group);
-	disk_id.push(group.id);
+	group_id.push(group.id);
 	index.push(scene.children.length - 1);
 	status[group.id] = {
 		pointdown: {
@@ -234,13 +234,13 @@ function set_initial_pressed(player_index, group) {
 	camera_position_pointDown = wm.view.position;
 	var pi = 0;
 	while(pi < pile_areas_length) {
-		pile_areas[pi].get_disk(group, status[group.id]);
+		pile_areas[pi].get_piece(group, status[group.id]);
 		++pi;
 	}
 	status[group.id].pointdown.processed[player_index].signal();
 	status[group.id].pointdown.timestamp[player_index] = g.game.age;
 	if (status[group.id].pointdown.in_board[player_index]) return;
-	wm.draw_modified(last[player_index].children[0], conf.disk.unselect.background);
+	wm.draw_modified(last[player_index].children[0], conf.piece.unselect.background);
 	wm.draw_modified(group.children[0], conf.players.item.operating[player_index]); // <---
 	last[player_index] = group;
 }
@@ -271,7 +271,7 @@ function place(ev, group, player_index) {
 				last[player_index] = group; // required set here again
 			}
 			else {
-				wm.draw_modified(group.children[0], conf.disk.unselect.background);
+				wm.draw_modified(group.children[0], conf.piece.unselect.background);
 			}
 			// var bw_flag = (group.children[1].srcX == 0 ? '黒' :'白');
 			// var message_here = conf.board.an.x[xy.x] + conf.board.an.y[xy.y] + 'に' + bw_flag + 'をおく@P' + wm.index_pp[player_index];
@@ -280,7 +280,7 @@ function place(ev, group, player_index) {
 	}
 	else {
 		if (!status[group.id].events.process.wait()) return;
-		wm.draw_modified(group.children[0], conf.disk.unselect.background);
+		wm.draw_modified(group.children[0], conf.piece.unselect.background);
 		set_piles(group, status[group.id]);
 		status[group.id].events.process.signal();
 		return;
@@ -289,38 +289,37 @@ function place(ev, group, player_index) {
 function reverse(group) {
 	group.tag.bw = (group.tag.bw + 1) % 2;
 	var ai = 0;
-	var length_animation = conf.disk.bw[group.tag.bw].transit.length;
+	var length_animation = conf.piece.bw[group.tag.bw].transit.length;
 	var intervalId = scene.setInterval(function () {
-		wm.draw_modified(group.children[1], conf.disk.bw[group.tag.bw].transit[ai]);
+		wm.draw_modified(group.children[1], conf.piece.bw[group.tag.bw].transit[ai]);
 		++ai;
 		if (ai >= length_animation) {
 			scene.clearInterval(intervalId);
 			scene.setTimeout(function () {
-				wm.draw_modified(group.children[1], conf.disk.bw[group.tag.bw].on_board);
-				wm.draw_modified(group.children[0], conf.disk.unselect.background);
+				wm.draw_modified(group.children[1], conf.piece.bw[group.tag.bw].on_board);
+				wm.draw_modified(group.children[0], conf.piece.unselect.background);
 				set_piles(group, status[group.id]);
 				status[group.id].events.process.signal();
 				return;
-			},  conf.disk.bw[group.tag.bw].transit_time);
+			},  conf.piece.bw[group.tag.bw].transit_time);
 		}
-	}, conf.disk.bw[group.tag.bw].transit_time);
+	}, conf.piece.bw[group.tag.bw].transit_time);
 	// var message_here = (group.tag.bw == 0 ? '黒' :'白') + 'に@P' + wm.index_pp[player_index];
 	// if (xy.validate) message_here = conf.board.an.x[xy.x] + conf.board.an.y[xy.y] + 'を' + message_here;
 	// commenting.post(message_here);
 }
 
+function to_top(id, pieces) {
+	var this_group_id_index = group_id.indexOf(id);
+	var this_index = index[this_group_id_index];
 
-function to_top(id, disks) {
-	var this_disk_id_index = disk_id.indexOf(id);
-	var this_index = index[this_disk_id_index];
+	var b = pieces[this_index];
+	pieces.splice(this_index, 1);
+	pieces.splice(index[n_piece0], 0, b);
 
-	var b = disks[this_index];
-	disks.splice(this_index, 1);
-	disks.splice(index[n_disks0], 0, b);
-
-	var c = disk_id[this_disk_id_index];
-	disk_id.splice(this_disk_id_index, 1);
-	disk_id.splice(n_disks0, 0, c);
+	var c = group_id[this_group_id_index];
+	group_id.splice(this_group_id_index, 1);
+	group_id.splice(n_piece0, 0, c);
 }
 module.exports.to_top = to_top;
 
@@ -353,13 +352,13 @@ function set_piles(d) {
 	while (re == -1){
 		var pi = 0;
 		while(pi < pile_areas_length) {
-			re = pile_areas[pi].set_disk(d);
+			re = pile_areas[pi].set_piece(d);
 			if (re == 1) {
 				return;
 			}
 			else if (re == -1) {
 				d.x = pile_areas[ops[pi][0]].area.x;
-				re = pile_areas[ops[pi][0]].set_disk(d);
+				re = pile_areas[ops[pi][0]].set_piece(d);
 				if (re == -1) {
 					d.x = pile_areas[ops[pi][1]].area.x + ops[pi][2];
 				}
@@ -372,7 +371,7 @@ function set_piles(d) {
 // function move(xy, d, transit_time = 20, s = [1.0,   1.5,   2.0,   2.5,   3.0,   2.5,   2.0,   1.5,   1.25,  1.0]) {
 // 	var d0 = {'x': d.x, 'y': d.y};
 // 	var x_index = d.tag.bw;
-// 	var dp = conf.disk.bw[x_index]['transit'];
+// 	var dp = conf.piece.bw[x_index]['transit'];
 // 	var angle_here = g.game.random.get(0, 359);
 // 	var dpa = [dp[0], dp[1], dp[2], dp[3], dp[4], dp[4], dp[3], dp[2], dp[1], dp[0]];
 // 	var sf =  s; //[1.0,   1.5,   2.0,   2.5,   3.0,   2.5,   2.0,   1.5,   1.25,  1.0]
@@ -382,7 +381,7 @@ function set_piles(d) {
 // 		var dpp = dpa[ii];
 // 		var r0  = (ii + 1) / length_animation;
 // 		var r1  = 1.0 - r0;
-// 		dpp.angle = angle_here * r0 + conf.disk.bw[x_index].on_board.angle * r1;
+// 		dpp.angle = angle_here * r0 + conf.piece.bw[x_index].on_board.angle * r1;
 // 		wm.draw_modified(d.children[1], dpp);
 // 		var dp  = {x: xy.x * r0 + d0.x * r1, y: xy.y * r0 + d0.y * r1, scaleX: sf[ii] * wm.view.zoom, scaleY: sf[ii] * wm.view.zoom};
 // 		wm.draw_modified(d, dp);
@@ -390,8 +389,8 @@ function set_piles(d) {
 // 		if (ii >= length_animation) {
 // 			scene.clearInterval(rot);
 // 				scene.setTimeout(function () {
-// 				wm.draw_modified(d.children[1], conf.disk.bw[x_index].on_board);
-// 				wm.draw_modified(d.children[0], conf.disk.unselect.background);
+// 				wm.draw_modified(d.children[1], conf.piece.bw[x_index].on_board);
+// 				wm.draw_modified(d.children[0], conf.piece.unselect.background);
 // 			}, transit_time);
 // 		}
 // 	}, transit_time);
