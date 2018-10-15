@@ -32,7 +32,7 @@ function main() {
 	wm.set_scene(scene);         		      // set window manager in scene
 	stack.set_scene(scene);				      // set stack disks in scene
 	piece.set_scene(scene);				      // set disks in scene
-	scene.loaded.add(function () { // ev is for future use
+	scene.loaded.add(function () {
 		// Pile areas
 		var pile_areas = [];
 		var lines_in_pile = 2;
