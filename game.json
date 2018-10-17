@@ -110,6 +110,9 @@
 		}
 	},
 	"environment": {
+		"niconico": {
+			"supportedModes": ["multi"]
+		},		
 		"sandbox-runtime": "2"
 	}
 }

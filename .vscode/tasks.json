@@ -8,6 +8,18 @@
             "type": "shell",
             "command": "akashic-sandbox",
             "problemMatcher": []
+        },
+        {
+            "label": "akashic scan asset",
+            "type": "shell",
+            "command": "akashic scan asset",
+            "problemMatcher": []
+        },
+        {
+            "label": "Export to RPG atsumaru",
+            "type": "shell",
+            "command": "akashic export html --strip --magnify --output ../reversi-self-atsumaru",
+            "problemMatcher": []
         }
     ]
 }
