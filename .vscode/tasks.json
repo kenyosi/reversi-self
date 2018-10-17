@@ -16,9 +16,15 @@
             "problemMatcher": []
         },
         {
+            "label": "Zip to upload",
+            "type": "shell",
+            "command": "akashic export zip --output ../${workspaceFolderBasename}.zip",
+            "problemMatcher": []
+        },
+        {
             "label": "Export to RPG atsumaru",
             "type": "shell",
-            "command": "akashic export html --strip --magnify --output ../reversi-self-atsumaru",
+            "command": "akashic export html --magnify --output ../${workspaceFolderBasename}-atsumaru.zip",
             "problemMatcher": []
         }
     ]
