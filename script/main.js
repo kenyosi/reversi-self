@@ -55,7 +55,7 @@ function main() {
 	wm.set_scene(scene);
 	stack.set_scene(scene);
 	piece.set_scene(scene);
-	scene.loaded.add(function () { // ev is for future use
+	scene.loaded.add(function () {
 		// Pile areas
 		var pile_areas = [];
 		var lines_in_pile = 2;
