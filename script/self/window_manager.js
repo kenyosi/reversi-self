@@ -4,7 +4,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Configuration
-var conf                       = require('config');
+var conf                       = require('../content_config');
 var view                       = {
 	floating: false,
 	position: {x: 0, y: 0},
@@ -15,16 +15,16 @@ module.exports.view = view;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
 var center = {x: g.game.width / 2, y: g.game.height / 2}; // not use now, but use for zooming
-var process                    = require('process');
-var player                     = require('player');
-var pointer                    = require('pointer');
-var common_control             = require('common_control');
-var admin_control              = require('admin_control');
-var help                       = require('help');
-// var commenting                 = require('commenting');
-var statusbar                  = require('statusbar');
-var confirm                    = require('confirm');
-var set_inital_locations       = require('set_initial_locations');
+var process                    = require('./process');
+var player                     = require('./player');
+var pointer                    = require('./pointer');
+var common_control             = require('./common_control');
+var admin_control              = require('./admin_control');
+var help                       = require('./help');
+// var commenting                 = require('./commenting');
+var statusbar                  = require('./statusbar');
+var confirm                    = require('./confirm');
+var set_inital_locations       = require('../set_initial_locations');
 var semaphoe                   = new process.semaphore(1);
 
 var player_operations = [];

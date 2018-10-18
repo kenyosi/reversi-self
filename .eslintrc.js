@@ -33,6 +33,8 @@ module.exports = {
                 "args": "after-used",
                 "ignoreRestSiblings": false
         }],
+        "no-undef-init": 1,
+        "no-useless-return": 1,
         "eol-last": [
             "error",
             "always"

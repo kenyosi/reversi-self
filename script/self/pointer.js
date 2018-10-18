@@ -4,16 +4,16 @@
  */
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Configuration
-var conf                       = require('config');
+var conf                       = require('../content_config');
 var que_length                 = 5   * g.game.fps;
 var start_in_hurry             = 0.1 * g.game.fps;
 var timeout_delta_frame        = 3   * g.game.fps;
 var drpf                       = 7; // delta radius per frame for creating animation in que
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
-var player                     = require('player');
-var wm                         = require('window_manager');
-var process                    = require('process');
+var player                     = require('./player');
+var wm                         = require('./window_manager');
+var process                    = require('./process');
 var scene;
 // var player_multi_touch = [];
 var player_pointer = [];

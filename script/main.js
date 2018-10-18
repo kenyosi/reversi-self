@@ -4,16 +4,16 @@
  */
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Configuration
-var conf                       = require('config');
+var conf                       = require('./content_config');
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
-var player                     = require('player');
-// var pointer                    = require('pointer');
-var piece                      = require('piece');
-var stack                      = require('object_group');
-var wm                         = require('window_manager');
-var set_inital_locations       = require('set_initial_locations');
+var player                     = require('./self/player');
+// var pointer                    = require('self/pointer');
+var piece                      = require('./piece');
+var stack                      = require('./object_group');
+var wm                         = require('./self/window_manager');
+var set_inital_locations       = require('./set_initial_locations');
 
 var cell_size_array            = [];
 var i = 0;

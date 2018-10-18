@@ -24,7 +24,7 @@
         {
             "label": "Export to RPG atsumaru",
             "type": "shell",
-            "command": "akashic export html --magnify --output ../${workspaceFolderBasename}-atsumaru",
+            "command": "akashic export html --atsumaru --output ../${workspaceFolderBasename}-atsumaru.zip",
             "problemMatcher": []
         }
     ]

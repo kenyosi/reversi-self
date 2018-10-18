@@ -4,7 +4,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Configuration
-var conf                       = require('config');
+var conf                       = require('./content_config');
 var board_cell_half_size       = {x: conf.board.cell.size.x / 2, y: conf.board.cell.size.y / 2};
 var n_disks0                   = conf.disk.n - 1;
 var timeout_delta_frame        = 3 * g.game.fps;
@@ -13,10 +13,10 @@ var timeout_delta_frame        = 3 * g.game.fps;
 // Initialization
 var scene;
 // var commenting                 = require('commenting');
-var process                    = require('process');
-var player                     = require('player');
-var pointer                    = require('pointer');
-var wm                         = require('window_manager');
+var process                    = require('./self/process');
+var player                     = require('./self/player');
+var pointer                    = require('./self/pointer');
+var wm                         = require('./self/window_manager');
 var disk_id                    = [];
 var index                      = [];
 var last                       = [];
@@ -278,13 +278,10 @@ function place(ev, group, player_index) {
 			// commenting.post(message_here);
 		}
 	}
-	else {
-		if (!status[group.id].events.process.wait()) return;
-		wm.draw_modified(group.children[0], conf.disk.unselect.background);
-		set_piles(group, status[group.id]);
-		status[group.id].events.process.signal();
-		return;
-	}
+	if (!status[group.id].events.process.wait()) return;
+	wm.draw_modified(group.children[0], conf.disk.unselect.background);
+	set_piles(group, status[group.id]);
+	status[group.id].events.process.signal();
 }
 function reverse(group) {
 	group.tag.bw = (group.tag.bw + 1) % 2;
@@ -299,8 +296,7 @@ function reverse(group) {
 				wm.draw_modified(group.children[1], conf.disk.bw[group.tag.bw].on_board);
 				wm.draw_modified(group.children[0], conf.disk.unselect.background);
 				set_piles(group, status[group.id]);
-				status[group.id].events.process.signal();
-				return;
+				status[group.id].events.process.signal();	
 			},  conf.disk.bw[group.tag.bw].transit_time);
 		}
 	}, conf.disk.bw[group.tag.bw].transit_time);
