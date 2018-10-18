@@ -14,9 +14,9 @@ var admin                      = {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
-var common_control                       = require('common_control');
-var player                               = require('player');
-var wm                                   = require('window_manager');
+var common_control                       = require('./common_control');
+var player                               = require('./player');
+var wm                                   = require('./window_manager');
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 module.exports.admin = admin;

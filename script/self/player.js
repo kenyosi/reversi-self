@@ -4,13 +4,13 @@
  */
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Configuration
-var conf                       = require('config');
+var conf                       = require('../content_config');
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
-// var commenting                 = require('commenting');
-var wm                         = require('window_manager');
-var pointer                    = require('pointer');
-var piece                      = require('piece');
+// var commenting                 = require('./commenting');
+var wm                         = require('./window_manager');
+var pointer                    = require('./pointer');
+var piece                      = require('../piece');
 var current                    = [ // intend deep copy, and avoid reference copy
 	{id: '-9999', name: '', head: 'Player1: 参加中', timestamp: conf.const.old_unix_time, time_warning: 0, player_plate: 0, player_plate_status: 0, login: false, group: 'admin'},
 ];

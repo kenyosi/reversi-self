@@ -4,12 +4,12 @@
  */
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Configuration
-var conf                       = require('config');
+var conf                       = require('../content_config');
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
-var wm                         = require('window_manager');
-var player                     = require('player');
+var wm                         = require('./window_manager');
+var player                     = require('./player');
 var scene;
 var cell_size_array            = [];
 var i = 0;

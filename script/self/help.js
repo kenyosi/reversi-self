@@ -4,7 +4,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Configuration
-var conf                       = require('config');
+var conf                       = require('../content_config');
 var help                       = {
 	show: false,
 	position: {x: 0, y: conf.help_board.height},
@@ -12,7 +12,7 @@ var help                       = {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
-var common_control                       = require('common_control');
+var common_control                       = require('./common_control');
 var scene;
 var view;
 var help_board;

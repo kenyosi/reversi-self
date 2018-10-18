@@ -4,12 +4,12 @@
  */
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Configuration
-var conf                       = require('config');
+var conf                       = require('./content_config');
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
-var wm                         = require('window_manager');
-var piece                      = require('piece');
+var wm                         = require('./self/window_manager');
+var piece                      = require('./piece');
 var stack_objects;
 
 var initial_object_locations = [];
