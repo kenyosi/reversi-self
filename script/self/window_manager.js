@@ -49,16 +49,6 @@ var status_bottom;
 // var stack_objects              = [];
 var player_objects;
 var confirm_window;
-var events = {
-	pointer_other_local_down: pointer.other_local_down,
-	pointer_other_local_move: pointer.other_local_move,
-	pointer_other_local_up: pointer.other_local_up,
-	eval_function: eval_function,
-	get_piece: local_get_piece,
-	move_piece: local_move_piece,
-	place_piece: local_place_piece,
-};
-module.exports.events = events;
 module.exports.view              = view;
 module.exports.admin             = admin;
 module.exports.semaphoe          = semaphoe;
@@ -70,19 +60,10 @@ function set_scene(sc) {
 	confirm.set_scene(scene);
 	// commenting.set_scene(scene); 		// set destination of comment
 	help.set_scene(scene, view);
-	// Messaging events
-	scene.message.add(function(mes) {
-		events[mes.data.destination](mes);
-	});
 }
 module.exports.set_scene = set_scene;
 function set_player_objects(obj) { player_objects = obj;}
 module.exports.set_stack_objects = set_player_objects;
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-function local_get_piece(mes) {return mes;}
-function local_move_piece(mes) {return mes;}
-function local_place_piece(mes) {return mes;}
-function eval_function(mes) {return eval(mes.data.message);}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function draw_modified(rect, properies) {
 	Object.keys(properies).forEach(function(key) {

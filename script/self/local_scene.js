@@ -1,5 +1,5 @@
 /*
- * User local view scene
+ * User local scene view
  * @self, Akashic content
  */
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -134,4 +134,4 @@ module.exports.sync_from_local_down = sync_from_local_down;
 
 function vcmult(a, b) {return {x: a.x * b.x, y: a.y * b.y};} // Multiply scalars in vector returns a vector
 function apb(a, b) {return {x: a.x + b.x, y: a.y + b.y};}    // a+b, Add two vectors
-function amb(a, b) {return {x: a.x - b.x, y: a.y - b.y};}    // a-b, Subtruct vector
+function amb(a, b) {return {x: a.x - b.x, y: a.y - b.y};}    // a-b, Substruct vector

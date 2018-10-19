@@ -51,10 +51,10 @@ function main() {
 		if (mes.data.destination === undefined) return;
 		if (events[mes.data.destination] === undefined) return;
 		events[mes.data.destination](mes);
-	});	
-	wm.set_scene(scene);
-	stack.set_scene(scene);
-	piece.set_scene(scene);
+	});
+	wm.set_scene(scene);         		      // set window manager in scene
+	stack.set_scene(scene);				      // set stack disks in scene
+	piece.set_scene(scene);				      // set disks in scene
 	scene.loaded.add(function () {
 		// Pile areas
 		var pile_areas = [];
