@@ -10,7 +10,7 @@
             "problemMatcher": []
         },
         {
-            "label": "akashic scan asset",
+            "label": "Scan asset",
             "type": "shell",
             "command": "akashic scan asset",
             "problemMatcher": []
@@ -22,7 +22,7 @@
             "problemMatcher": []
         },
         {
-            "label": "Export to RPG atsumaru",
+            "label": "Export to Atsumaru",
             "type": "shell",
             "command": "akashic export html --atsumaru --output ../${workspaceFolderBasename}-atsumaru.zip",
             "problemMatcher": []

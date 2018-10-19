@@ -107,6 +107,11 @@
 			"type": "script",
 			"path": "script/self/window_manager.js",
 			"global": true
+		},
+		"message_event_manager": {
+			"type": "script",
+			"path": "script/self/message_event_manager.js",
+			"global": true
 		}
 	},
 	"environment": {
