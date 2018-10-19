@@ -1,7 +1,7 @@
 /*
  * Common part
  * @self, Akashic content
-
+ * 
  * All features are currently disabled. They worked in an early stage of development. Future releases might use some of them again. 
  */
 // function draw_modified(rect, properies) {
@@ -276,3 +276,4 @@
 // 	// if (counter > 0) commenting.post('盤をひっくり返しました@P' + wm.index_pp[player_index]);
 // 	// else commenting.post('盤をひっくりかえしましたが、コマはありませんでした@P' + wm.index_pp[player_index]);
 // }
+

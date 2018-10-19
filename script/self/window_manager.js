@@ -4,7 +4,7 @@
  */
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Configuration
-var conf                       = require('config');
+var conf                       = require('../content_config');
 var view                       = {
 	floating: false,
 	position: {x: 0, y: 0},
@@ -14,19 +14,18 @@ module.exports.view = view;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
-var center = {x: g.game.width, y: g.game.height}; // not use now, but use for zooming
-var process                    = require('process');
-var player                     = require('player');
-var pointer                    = require('pointer');
-var common_control             = require('common_control');
-var admin_control              = require('admin_control');
-var help                       = require('help');
-// var commenting                 = require('commenting');
-var statusbar                  = require('statusbar');
-var confirm                    = require('confirm');
-var set_inital_locations       = require('set_initial_locations');
+var center = {x: g.game.width / 2, y: g.game.height / 2}; // not use now, but use for zooming
+var process                    = require('./process');
+var player                     = require('./player');
+var pointer                    = require('./pointer');
+var common_control             = require('./common_control');
+var admin_control              = require('./admin_control');
+var help                       = require('./help');
+// var commenting                 = require('./commenting');
+var statusbar                  = require('./statusbar');
+var confirm                    = require('./confirm');
+var set_inital_locations       = require('../set_initial_locations');
 var semaphoe                   = new process.semaphore(1);
-// var admin_control              = new process.semaphore(1);
 
 var player_operations = [];
 var ii = 0;
@@ -45,12 +44,13 @@ while (i < 20) {
 	i++;
 }
 
-// var center                     = {x: g.game.width / 2, y: g.game.height / 2};
 var login_controls             = [];
 var status_bottom;
 // var stack_objects              = [];
 var player_objects;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var confirm_window;
+
 module.exports.view              = view;
 module.exports.admin             = admin;
 module.exports.index_pp          = index_pp;
@@ -60,12 +60,13 @@ module.exports.player_operations = player_operations;
 function set_scene(sc) {
 	scene = sc;
 	common_control.set_scene(sc);
+	confirm.set_scene(scene);
+	// commenting.set_scene(scene); 		// set destination of comment
+	help.set_scene(scene, view);
 }
 module.exports.set_scene = set_scene;
 function set_player_objects(obj) { player_objects = obj;}
 module.exports.set_stack_objects = set_player_objects;
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function draw_modified(rect, properies) {
 	Object.keys(properies).forEach(function(key) {
@@ -126,6 +127,14 @@ function createPlayAgainControl(x, y, w, h, style, confirm_object) {
 				scene.clearInterval(confirm_interval);
 				// after confirmation
 				if (!confirm.point_up.result) return;// commenting.post('操作を取り消します');
+				// initialize semaphoe in @self
+				var ii = 0;
+				while(ii < conf.players.max_players) {
+					player_operations[ii].set_value(conf.window.max_multi_operation); // inital value
+					pointer.pointers_pressed[ii].set_value(0);                        // inital value
+					ii++;
+				}
+				// initialize pieces in game specific
 				set_inital_locations.pieces(scene);
 			}
 		}, 100);
@@ -145,18 +154,20 @@ function update_pointer_login(flag, player_index) {
 module.exports.update_pointer_login = update_pointer_login;
 
 var pointer_login = [];
-function create(confirm_object) {
+// function create(confirm_object) {
+function create() {
+	confirm_window = new confirm.create_window(1); // ci = 1 means checking player 1 only
 	// var camera_control = createCameraControl(cell_size_array[8], cell_size_array[8], cell_size_array[1], cell_size_array[1], conf.window_icon.camera);
 	// scene.append(camera_control);
 	var help_control       = help.create_control(g.game.width - cell_size_array[1], g.game.height - cell_size_array[1], cell_size_array[1], cell_size_array[1], conf.window_icon.help, []);
 	scene.append(help_control);
-	var play_again_control = createPlayAgainControl(g.game.width - cell_size_array[1], g.game.height - cell_size_array[2], cell_size_array[1], cell_size_array[1], conf.window_icon.restart_game, confirm_object);
+	var play_again_control = createPlayAgainControl(g.game.width - cell_size_array[1], g.game.height - cell_size_array[2], cell_size_array[1], cell_size_array[1], conf.window_icon.restart_game, confirm_window);
 	scene.append(play_again_control);
 	var ii = 1;
 	while(ii < conf.players.max_players) {
 		var ypos = ii + 2;
 		var pind = conf.players.max_players - ii;
-		login_controls[pind] = createLoginControl(pind, g.game.width - cell_size_array[1], g.game.height - cell_size_array[ypos], cell_size_array[1], cell_size_array[1], conf.window_icon.login, confirm_object);
+		login_controls[pind] = createLoginControl(pind, g.game.width - cell_size_array[1], g.game.height - cell_size_array[ypos], cell_size_array[1], cell_size_array[1], conf.window_icon.login, confirm_window);
 		scene.append(login_controls[pind]);
 		ii++;
 	}
@@ -168,10 +179,12 @@ function create(confirm_object) {
 		g.game.width - cell_size_array[1], g.game.height - cell_size_array[ypos+1], cell_size_array[1], cell_size_array[1], conf.window_icon.admin
 	));
 
+	help.create_board(conf.help_board, 0, 0); // Help board
+
 	pointer.set_scene(scene);
 	var player_index = 0;
 	while (player_index < conf.players.max_players) {
-		var jj = conf.window.max_multi_touch - 1;
+		var jj = conf.window.max_pointers - 1;
 		while (jj > 0) {
 			var pp = new pointer.user(player_index, jj, conf.players.window_pointer[player_index]);
 			pp.pointer.hide();
@@ -182,10 +195,7 @@ function create(confirm_object) {
 		pointer.update_by_operation('on', player_index, undefined);
 		++player_index;
 	}
-	help.create_board(conf.help_board, 0, 0);
 	player_index = player.find_index(g.game.player.id);
-	// pointer.update_by_operation('on', 0, undefined);
-	// pointer.update_by_operation('on', 1, undefined);
 }
 module.exports.create = create;
 

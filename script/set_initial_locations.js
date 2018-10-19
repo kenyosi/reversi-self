@@ -4,13 +4,12 @@
  */
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Configuration
-var conf                       = require('config');
+var conf                       = require('./content_config');
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
-var wm                         = require('window_manager');
-var pointer                    = require('pointer');
-var piece                      = require('piece');
+var wm                         = require('./self/window_manager');
+var piece                      = require('./piece');
 var stack_objects;
 
 var initial_object_locations = [];
@@ -22,11 +21,9 @@ module.exports.set_initial_object_locations = set_initial_object_locations;
 
 function pieces (scene) {
 	// move_view(-view.position.x, -view.position.y); // reset view
-	// Initialize all semaphoes
+	// Initialize semaphoes in geme specific
 	var jj = 0;
 	while (jj < conf.players.max_players) {
-		wm.player_operations[jj].set_value(conf.window.max_multi_operation); // inital value
-		pointer.pointers_pressed[jj].set_value(0); // inital value
 		var ii = 0;
 		var length_status = piece.status.length;
 		while (ii < length_status) {

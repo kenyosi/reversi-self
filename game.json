@@ -9,17 +9,6 @@
 			"path": "script/main.js",
 			"global": true
 		},
-		"othello_disk": {
-			"type": "image",
-			"width": 224,
-			"height": 32,
-			"path": "image/othello_disk.png"
-		},
-		"config": {
-			"type": "script",
-			"path": "script/config.js",
-			"global": true
-		},
 		"window_manager_icons": {
 			"type": "image",
 			"width": 128,
@@ -29,31 +18,6 @@
 		"object_group": {
 			"type": "script",
 			"path": "script/object_group.js",
-			"global": true
-		},
-		"pointer": {
-			"type": "script",
-			"path": "script/ex_window/pointer.js",
-			"global": true
-		},
-		"statusbar": {
-			"type": "script",
-			"path": "script/ex_window/statusbar.js",
-			"global": true
-		},
-		"process": {
-			"type": "script",
-			"path": "script/ex_window/process.js",
-			"global": true
-		},
-		"commenting": {
-			"type": "script",
-			"path": "script/ex_window/commenting.js",
-			"global": true
-		},
-		"player": {
-			"type": "script",
-			"path": "script/ex_window/player.js",
 			"global": true
 		},
 		"piece": {
@@ -67,39 +31,9 @@
 			"height": 480,
 			"path": "image/help_screen.png"
 		},
-		"common": {
-			"type": "script",
-			"path": "script/ex_window/common.js",
-			"global": true
-		},
-		"common_control": {
-			"type": "script",
-			"path": "script/ex_window/common_control.js",
-			"global": true
-		},
-		"help": {
-			"type": "script",
-			"path": "script/ex_window/help.js",
-			"global": true
-		},
-		"confirm": {
-			"type": "script",
-			"path": "script/ex_window/confirm.js",
-			"global": true
-		},
-		"admin_control": {
-			"type": "script",
-			"path": "script/ex_window/admin_control.js",
-			"global": true
-		},
 		"set_initial_locations": {
 			"type": "script",
 			"path": "script/set_initial_locations.js",
-			"global": true
-		},
-		"window_manager": {
-			"type": "script",
-			"path": "script/ex_window/window_manager.js",
 			"global": true
 		},
 		"help_screen_solo": {
@@ -107,9 +41,80 @@
 			"width": 640,
 			"height": 480,
 			"path": "image/help_screen_solo.png"
+		},
+		"reversi_disk": {
+			"type": "image",
+			"width": 224,
+			"height": 32,
+			"path": "image/reversi_disk.png"
+		},
+		"content_config": {
+			"type": "script",
+			"path": "script/content_config.js",
+			"global": true
+		},
+		"admin_control": {
+			"type": "script",
+			"path": "script/self/admin_control.js",
+			"global": true
+		},
+		"commenting": {
+			"type": "script",
+			"path": "script/self/commenting.js",
+			"global": true
+		},
+		"common": {
+			"type": "script",
+			"path": "script/self/common.js",
+			"global": true
+		},
+		"common_control": {
+			"type": "script",
+			"path": "script/self/common_control.js",
+			"global": true
+		},
+		"confirm": {
+			"type": "script",
+			"path": "script/self/confirm.js",
+			"global": true
+		},
+		"help": {
+			"type": "script",
+			"path": "script/self/help.js",
+			"global": true
+		},
+		"player": {
+			"type": "script",
+			"path": "script/self/player.js",
+			"global": true
+		},
+		"pointer": {
+			"type": "script",
+			"path": "script/self/pointer.js",
+			"global": true
+		},
+		"process": {
+			"type": "script",
+			"path": "script/self/process.js",
+			"global": true
+		},
+		"statusbar": {
+			"type": "script",
+			"path": "script/self/statusbar.js",
+			"global": true
+		},
+		"window_manager": {
+			"type": "script",
+			"path": "script/self/window_manager.js",
+			"global": true
 		}
 	},
 	"environment": {
+		"niconico": {
+			"supportedModes": [
+				"multi"
+			]
+		},
 		"sandbox-runtime": "2"
 	}
 }

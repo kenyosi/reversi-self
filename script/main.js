@@ -4,18 +4,16 @@
  */
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Configuration
-var conf                       = require('config');
+var conf                       = require('./content_config');
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
-// var commenting                 = require('commenting');
-var player                     = require('player');
-var piece                       = require('piece');
-var stack                      = require('object_group');
-var wm                         = require('window_manager');
-var help                       = require('help');
-var confirm                    = require('confirm');
-var set_inital_locations       = require('set_initial_locations');
+var player                     = require('./self/player');
+// var pointer                    = require('self/pointer');
+var piece                      = require('./piece');
+var stack                      = require('./object_group');
+var wm                         = require('./self/window_manager');
+var set_inital_locations       = require('./set_initial_locations');
 
 var cell_size_array            = [];
 var i = 0;
@@ -23,14 +21,23 @@ while (i < 20) {
 	cell_size_array[i] = i * conf.board.cell.size.x;
 	i++;
 }
-
 var cell_size_x_m_1            = conf.board.cell.size.x - 1;
 var cell_size_y_m_1            = conf.board.cell.size.y - 1;
-
-var caster_joined              = false;
-
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+var events = {
+	// pointer_other_local_down: pointer.other_local_down,
+	// pointer_other_local_move: pointer.other_local_move,
+	// pointer_other_local_up: pointer.other_local_up,
+	eval_function: eval_function,
+	// get_piece: local_get_piece,
+	// move_piece: local_move_piece,
+	// place_piece: local_place_piece,
+};
+function eval_function(mes) {return eval(mes.data.message);}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 function main() {
+	var caster_joined = false;
 	g.game.join.add(function (ev) {
 		var player_index = 0;
 		if (!caster_joined) {
@@ -38,27 +45,18 @@ function main() {
 			caster_joined = true;
 		}
 	});
-	var scene = new g.Scene({game: g.game, assetIds: ['othello_disk', 'window_manager_icons', 'help_screen', 'help_screen_solo']});
-	// commenting.set_scene(scene); 		// set destination of comment
-	stack.set_scene(scene);				// set stack disks in scene
-
-	// Messaging event
+	var scene = new g.Scene({game: g.game, assetIds: ['reversi_disk', 'window_manager_icons', 'help_screen', 'help_screen_solo']});
 	scene.message.add(function(mes) {
-		switch(mes.data.destination) {
-		case 'eval':
-			eval(mes.data.message);
-			break;
-		}
+		if (mes === undefined) return;
+		if (mes.data === undefined) return;
+		if (mes.data.destination === undefined) return;
+		if (events[mes.data.destination] === undefined) return;
+		events[mes.data.destination](mes);
 	});
-
-	scene.loaded.add(function () { // ev is for future use
-		wm.set_scene(scene);         		      // set window manager in scene
-		piece.set_scene(scene);				      // set disks in scene
-		confirm.set_scene(scene);
-		help.set_scene(scene, wm.view);			  // set disks in scene
-		help.create_board(conf.help_board, 0, 0); // Help board
-		// wm.move_view(0, -conf.help_board.scroll_height);
-
+	wm.set_scene(scene);         		      // set window manager in scene
+	stack.set_scene(scene);				      // set stack disks in scene
+	piece.set_scene(scene);				      // set disks in scene
+	scene.loaded.add(function () {
 		// Pile areas
 		var pile_areas = [];
 		var lines_in_pile = 2;
@@ -117,7 +115,7 @@ function main() {
 					height: cell_size_y_m_1,
 					piece: {
 						scene: scene,
-						src: scene.assets['othello_disk'],
+						src: scene.assets['reversi_disk'],
 						opacity: conf.disk.bw[jj].opacity,
 						width: cell_size_x_m_1,
 						height: cell_size_y_m_1,
@@ -144,7 +142,6 @@ function main() {
 			piece.last[jj] = d;
 			jj++;
 		}
-		var confirm_window = new confirm.create_window(1); // ci = 1 means checking player 1 only
 
 		var initial_disk_locations = [];
 		ii = conf.disk.n - 1;
@@ -159,9 +156,7 @@ function main() {
 		set_inital_locations.set_initial_object_locations(initial_disk_locations);
 
 		// Create window manager
-		var wm_create = function() {wm.create(confirm_window);};
-		scene.setTimeout(wm_create, 250);
-
+		scene.setTimeout(function() {wm.create();}, 100);
 	});
 	g.game.pushScene(scene);
 }

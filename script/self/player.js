@@ -4,22 +4,22 @@
  */
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Configuration
-var conf                       = require('config');
+var conf                       = require('../content_config');
 var status_bar_messages = ['あなたはP1です'];
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
-// var commenting                 = require('commenting');
-var wm                         = require('window_manager');
-var pointer                    = require('pointer');
-var piece                      = require('piece');
+// var commenting                 = require('./commenting');
+var wm                         = require('./window_manager');
+var pointer                    = require('./pointer');
+var piece                      = require('../piece');
 var current                    = [ // intend deep copy, and avoid reference copy
 	{id: '-9999', name: '', head: 'Player1: 参加中', timestamp: conf.const.old_unix_time, time_warning: 0, player_plate: 0, player_plate_status: 0, login: false, group: 'admin'},
 ];
 var validate_index = [
 	{st: 0, en: conf.players.max_players}, // player 1, player 2, and player 3
 	{st: 0, en: 1},                        // player 1 only
-	// {st: 1, en: 2},                        // player 2 only
-	// {st: 2, en: 3},                        // player 3 only
+	{st: 1, en: 2},                        // player 2 only
+	{st: 2, en: 3},                        // player 3 only
 ];
 
 var ii = 0;
@@ -36,9 +36,23 @@ while (ii < conf.players.max_players) {
 	ii++;
 }
 
+var caster_joined              = false;
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 module.exports.current         = current;
+
+function init() {
+	g.game.join.add(function (ev) {
+		var player_index = 0;
+		if (!caster_joined) {
+		// player.current[player_index] = player.new_propoeties(ev.player, player_index, g.game.age);
+			current[player_index] = new_propoeties(ev.player, player_index, g.game.age);
+			caster_joined = true;
+		}
+	});
+}
+module.exports.init = init;
+
 // function set_scene(sc) { scene = sc;}
 // module.exports.set_scene = set_scene;
 // function set_show_by_join(obj) { show_by_join = obj;}

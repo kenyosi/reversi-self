@@ -4,9 +4,9 @@
  */
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Configuration
-var co                         = require('config');
-var pi                         = require('piece');
-var wm                         = require('window_manager');
+var co                         = require('./content_config');
+var pi                         = require('./piece');
+var wm                         = require('./self/window_manager');
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
