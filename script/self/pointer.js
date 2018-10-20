@@ -33,30 +33,35 @@ module.exports.pointers_pressed = pointers_pressed;
 function set_scene(sc) {
 	scene = sc;
 	scene.pointDownCapture.add(function (ev) {
-		// console.log(wm.local_scene_player);
 		var message = common_point_event(ev);
 		if (message === false) return;
 		var index = message.index;
-		// var ev_sync = message.ev_sync;
-		var ev_sync = wm.local_scene_player[index.player].global_from_local_down(ev);
 		var user = player_pointer[index.player][index.pointer];
 		if(user.pointer.tag.pointer_pressed) return; // check if pointer is already pressed.
-		down(index, ev_sync);
+		//<--- development
+		var ev_sync = wm.local_scene_player[index.player].inverse_down(ev);
+		// console.log(ev);
+		// console.log(ev_sync);
+		// down(index, ev_sync);
 		fire_other_local('pointer_other_local_down', index, ev_sync);
 	});
 	scene.pointMoveCapture.add(function (ev) {
 		var message = common_point_event(ev);
 		if (message === false) return;
 		var index = message.index;
-		// var ev_sync = message.ev_sync;
-		var ev_sync = wm.local_scene_player[index.player].global_from_local(ev);
 		var user = player_pointer[index.player][index.pointer];
 		if(!user.pointer.tag.pointer_pressed) {// resuming process
-			down(index, user.pointer.tag.last_ev);
+			//<--- development
+			// down(index, user.pointer.tag.last_ev);
+			if (user.pointer.tag.last_ev === undefined) {
+				user.pointer.tag.last_ev = wm.local_scene_player[index.player].inverse_down(ev);
+			}
 			fire_other_local('pointer_other_local_down', index, user.pointer.tag.last_ev);
 			return;
 		}
-		move(index, ev_sync);
+		//<--- development
+		var ev_sync = wm.local_scene_player[index.player].inverse(ev);
+		// move(index, ev_sync);
 		fire_other_local('pointer_other_local_move', index, ev_sync);
 	});
 	scene.pointUpCapture.add(function (ev) {
@@ -65,12 +70,12 @@ function set_scene(sc) {
 		var message = common_point_event(ev);
 		if (message === false) return;
 		var index = message.index;
-		// var ev_sync = message.ev_sync;
-		// var ev_sync = wm.local_scene_player[index.player].global_from_local(ev);
 		var user = player_pointer[index.player][index.pointer];
 		if(!user.pointer.tag.pointer_pressed) return; // check if pointer is already unpressed.
 		// unpressed process
-		up(index);
+		//<--- development
+		// var ev_sync = wm.local_scene_player[index.player].inverse(ev);
+		// up(index);
 		fire_other_local('pointer_other_local_up', index);
 	});
 }
@@ -216,8 +221,9 @@ var user = function(player_index, pointer_index, style) {
 			pointer: pointer.tag.pointer_index,
 		};
 		update_by_operation('off', index.player, undefined);
-		up(index);
-		// fire_other_local('pointer_other_local_up', index);
+		//<--- development
+		// up(index);
+		fire_other_local('pointer_other_local_up', index);
 	});
 	this.pointer.update.add(function() {
 		if (buffer.current == buffer.latest) {
@@ -296,7 +302,6 @@ function set_last_status(pointer_pressed, ev, group) {
 }
 
 function common_point_event(ev) {
-	// var norm_function = {down: local_scene.sync_from_local_down, move: local_scene.sync_from_local, up: local_scene.sync_from_local};
 	if (!player.validate(ev.player)) return false;
 	var player_id = player.find_index(ev.player.id);
 	if (ev.pointerId > conf.window.max_pointers) return false;
@@ -308,31 +313,37 @@ function common_point_event(ev) {
 			player: player_id,
 			pointer: ev.pointerId,
 		},
-		// ev_sync: norm_function[point_event](ev),
 	};
 }
 
 function other_local_down(message) {
-	// pointer_other_local_down as destination in message event in window_manager.js
+	// pointer_other_local_down as destination in message event in message_eventmanager.js
 	var index = message.data.index;
-	var ev = message.data.ev;
-	if (index.player === player.find_index(ev.player.id)) return;
+	// var ev = message.data.ev;
+	var ev = wm.local_scene_player[index.player].forward_down(message.data.ev);
+	// console.log(ev);
+	//<--- development
+	// if (index.player === player.find_index(ev.player.id)) return;
 	down(index, ev);
 }
 module.exports.other_local_down = other_local_down;
 function other_local_move(message) {
-	// pointer_other_local_move as destination in message event in window_manager.js
+	// pointer_other_local_down as destination in message event in message_eventmanager.js
 	var index = message.data.index;
-	var ev = message.data.ev;
-	if (index.player === player.find_index(ev.player.id)) return;
+	// var ev = message.data.ev;
+	var ev = wm.local_scene_player[index.player].forward(message.data.ev);
+	//<--- development
+	// if (index.player === player.find_index(ev.player.id)) return;
 	move(index, ev);
 }
 module.exports.other_local_move = other_local_move;
 function other_local_up(message) {
-	// pointer_other_local_up as destination in message event in window_manager.js
-	var index = message.data.index;
-	var ev = message.data.ev;
-	if (index.player === player.find_index(ev.player.id)) return;
+	// pointer_other_local_down as destination in message event in message_eventmanager.js
+	// var index = message.data.index;
+	// var ev = message.data.ev;
+	// var ev = wm.local_scene_player[index.player].forward_down(message.data.ev);
+	//<--- development
+	// if (index.player === player.find_index(ev.player.id)) return;
 	up(message.data.index);
 }
 module.exports.other_local_up = other_local_up;
@@ -365,7 +376,8 @@ function fire_other_local(function_name, index, ev) {
 			ev: ev,
 		}
 	};
-	// scene.message.fire(mes);
+	// console.log(mes);
+	scene.message.fire(mes);
 	return mes;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////

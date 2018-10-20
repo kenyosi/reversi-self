@@ -15,17 +15,18 @@ module.exports.view = view;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
 var center = {x: g.game.width / 2, y: g.game.height / 2}; // not use now, but use for zooming
+var set_inital_locations       = require('../set_initial_locations');
 var process                    = require('./process');
 var player                     = require('./player');
 var pointer                    = require('./pointer');
 var common_control             = require('./common_control');
 var admin_control              = require('./admin_control');
 var help                       = require('./help');
-// var commenting                 = require('./commenting');
 var statusbar                  = require('./statusbar');
 var confirm                    = require('./confirm');
-var set_inital_locations       = require('../set_initial_locations');
+// var commenting                 = require('./commenting');
 var local_scene                = require('./local_scene');
+var message_event              = require('./message_event_manager');
 var semaphoe                   = new process.semaphore(1);
 
 var player_operations = [];
@@ -56,10 +57,12 @@ module.exports.player_operations = player_operations;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function set_scene(sc) {
 	scene = sc;
+	message_event.init(sc);
 	common_control.set_scene(sc);
 	confirm.set_scene(scene);
 	// commenting.set_scene(scene); 		// set destination of comment
 	help.set_scene(scene, view);
+	pointer.set_scene(scene);
 }
 module.exports.set_scene = set_scene;
 function set_player_objects(obj) { player_objects = obj;}
@@ -80,7 +83,6 @@ function createLoginControl(target_player_index, x, y, w, h, style, confirm_obje
 	var name = new g.Label({
 		scene: scene,
 		font: conf.default_font,
-		// text: 'P' + index_pp[group.tag.target_player_index],
 		text: player.head[group.tag.target_player_index],
 		fontSize: 14,
 		textColor:  '#000000',
@@ -180,7 +182,7 @@ function create() {
 
 	help.create_board(conf.help_board, 0, 0); // Help board
 
-	pointer.set_scene(scene);
+	// pointer.set_scene(scene);
 	var player_index = 0;
 	while (player_index < conf.players.max_players) {
 		var jj = conf.window.max_pointers - 1;

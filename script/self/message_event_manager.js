@@ -8,12 +8,12 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
-// var player                     = require('./player');
+var pointer                    = require('./pointer');
 var scene;
 var events = {
-	// pointer_other_local_down: pointer.other_local_down,
-	// pointer_other_local_move: pointer.other_local_move,
-	// pointer_other_local_up: pointer.other_local_up,
+	pointer_other_local_down: pointer.other_local_down,
+	pointer_other_local_move: pointer.other_local_move,
+	pointer_other_local_up: pointer.other_local_up,
 	eval_function: eval_function,
 	get_piece: local_get_piece,
 	move_piece: local_move_piece,
