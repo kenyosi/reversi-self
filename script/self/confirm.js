@@ -11,12 +11,8 @@ var conf                       = require('../content_config');
 var wm                         = require('./window_manager');
 var player                     = require('./player');
 var scene;
-var cell_size_array            = [];
-var i = 0;
-while (i < 20) {
-	cell_size_array[i] = i * conf.board.cell.size.x;
-	i++;
-}
+var cs = conf.cell.array;
+
 var point_up                 = {
 	result: false,
 };
@@ -73,18 +69,18 @@ function create(p, x, y, ci) {// ci is kept for future use
 	group.append(background);
 	var yes_group =  new g.E({
 		scene: scene,
-		x: cell_size_array[1] *0.25,
-		y: p.height - cell_size_array[1] - 6,
-		height: cell_size_array[1],
-		width: cell_size_array[2],
+		x: cs[1] *0.25,
+		y: p.height - cs[1] - 6,
+		height: cs[1],
+		width: cs[2],
 		touchable: true,
 	});
 	var yes_background = new g.FilledRect({
 		scene: scene,
 		cssColor: conf.window_icon.yes.background.off.cssColor,
 		opacity: conf.window_icon.yes.background.off.opacity,
-		height: cell_size_array[1],
-		width: cell_size_array[2],
+		height: cs[1],
+		width: cs[2],
 		touchable: false,
 	});
 	yes_group.append(yes_background);
@@ -116,18 +112,18 @@ function create(p, x, y, ci) {// ci is kept for future use
 	group.append(yes_group);
 	var no_group =  new g.E({
 		scene: scene,
-		x: 2.75 * cell_size_array[1],
-		y: p.height - cell_size_array[1] - 6,
-		height: cell_size_array[1],
-		width: cell_size_array[2],
+		x: 2.75 * cs[1],
+		y: p.height - cs[1] - 6,
+		height: cs[1],
+		width: cs[2],
 		touchable: true,
 	});
 	var no_background = new g.FilledRect({
 		scene: scene,
 		cssColor: conf.window_icon.no.background.off.cssColor,
 		opacity: conf.window_icon.no.background.off.opacity,
-		height: cell_size_array[1],
-		width: cell_size_array[2],
+		height: cs[1],
+		width: cs[2],
 		touchable: false,
 	});
 	no_group.append(no_background);

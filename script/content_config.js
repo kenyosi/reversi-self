@@ -16,12 +16,18 @@ var constant = {
 };
 module.exports.const = constant;
 
-var cs            = [];
+var cell = {
+	array: [],
+	unit_m1: {x: constant.unit.x - 1, y: constant.unit.y - 1,
+		width: constant.unit.width - 1, height: constant.unit.height - 1}
+};
 var i = 0;
 while(i < 20) {// [0, 1 * size, 2 * size, ...]
-	cs[i] = i * constant.unit.x;
+	cell.array[i] = i * constant.unit.x;
 	i++;
 }
+module.exports.cell = cell;
+var cs = cell.array; // cell size array
 
 ////////////////////////////////////////////////////////////////////////////////////////////
 // Game specific

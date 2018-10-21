@@ -31,9 +31,10 @@ var player = function(player_index) {
 };
 module.exports.player = player;
 
-player.prototype.set_rotate_angle = function (r) {
-	var cos_r  = Math.cos(r);
-	var sin_r  = Math.sin(r);
+player.prototype.set_rotate_angle = function (rotate_angle) {
+	this.angle = rotate_angle;
+	var cos_r  = Math.cos(rotate_angle);
+	var sin_r  = Math.sin(rotate_angle);
 	var zc = [
 		this.local_zero.x + this.local_center.x,
 		this.local_zero.y + this.local_center.y

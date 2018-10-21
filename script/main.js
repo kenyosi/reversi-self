@@ -11,44 +11,26 @@ var conf                       = require('./content_config');
 var piece                      = require('./piece');
 var stack                      = require('./object_group');
 var set_inital_locations       = require('./set_initial_locations');
-var player                     = require('./self/player');
+// var player                     = require('./self/player');
 var wm                         = require('./self/window_manager');
 
-var cell_size_array            = [];
-var i = 0;
-while (i < 20) {
-	cell_size_array[i] = i * conf.board.cell.size.x;
-	i++;
-}
-var cell_size_x_m_1            = conf.board.cell.size.x - 1;
-var cell_size_y_m_1            = conf.board.cell.size.y - 1;
+var cs = conf.cell.array;
+var csm1 = conf.cell.unit_m1;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function main() {
-	var caster_joined = false;
-	g.game.join.add(function (ev) {
-		var player_index = 0;
-		if (!caster_joined) {
-			player.current[player_index] = player.new_propoeties(ev.player, player_index, g.game.age);
-			caster_joined = true;
-		}
+	wm.init();
+	var scene = new g.Scene({game: g.game, assetIds:
+		['reversi_disk', 'window_manager_icons', 'help_screen', 'help_screen_solo']
 	});
-	var scene = new g.Scene({game: g.game, assetIds: ['reversi_disk', 'window_manager_icons', 'help_screen', 'help_screen_solo']});
-	// scene.message.add(function(mes) {
-	// 	if (mes === undefined) return;
-	// 	if (mes.data === undefined) return;
-	// 	if (mes.data.destination === undefined) return;
-	// 	if (events[mes.data.destination] === undefined) return;
-	// 	events[mes.data.destination](mes);
-	// });
-	wm.set_scene(scene);         		      // set window manager in scene
-	stack.set_scene(scene);				      // set stack disks in scene
-	piece.set_scene(scene);				      // set disks in scene
+	wm.set_scene(scene);
+	stack.set_scene(scene);
+	piece.set_scene(scene);
 	scene.loaded.add(function () {
 		// Pile areas
 		var pile_areas = [];
 		var lines_in_pile = 2;
-		var dx = cell_size_array[1];
-		var dy = 4.0 * cell_size_array[1] + 12;
+		var dx = cs[1];
+		var dy = cs[4] + 12;
 		var ii = 0;
 		var flags = [[1, 0, 0, 0], [0, 1, 0, 0]];
 		while(ii < conf.piece.bw_n * lines_in_pile) {
@@ -73,9 +55,9 @@ function main() {
 			var xy = indTo2D(ii, conf.board.size.x);
 			scene.append(
 				createBoard(
-					cell_size_array[xy[0]] + conf.board.location.x0 + wm.view.position.x,
-					cell_size_array[xy[1]] + conf.board.location.y0 + wm.view.position.y,
-					cell_size_x_m_1, cell_size_y_m_1, scene
+					cs[xy[0]] + conf.board.location.x0 + wm.view.position.x,
+					cs[xy[1]] + conf.board.location.y0 + wm.view.position.y,
+					csm1.x, csm1.y, scene
 				)
 			);
 			++ii;
@@ -84,9 +66,9 @@ function main() {
 		// pieces in pile areas
 		var pieces_pp      = conf.piece.n / conf.piece.bw_n;
 		var pieces_in_line = pieces_pp / lines_in_pile;
-		var x0            = cell_size_array[15] - 0.2 * cell_size_array[1];
-		var y0            = cell_size_array[4] -6;
-		dx            = 1 + cell_size_array[1];
+		var x0            = cs[15] - 0.2 * cs[1];
+		var y0            = cs[4] - 6;
+		dx            = 1 + cs[1];
 		dy            = 6;
 		var jj = 0;
 		var index   = 0;
@@ -98,19 +80,19 @@ function main() {
 					x: x0 + dp[1] * dx + wm.view.position.x,
 					y: y0 - dp[0] * dy + wm.view.position.y,
 					bw: jj,
-					width: cell_size_x_m_1,
-					height: cell_size_y_m_1,
+					width: csm1.x,
+					height: csm1.y,
 					piece: {
 						scene: scene,
 						src: scene.assets['reversi_disk'],
 						opacity: conf.piece.bw[jj].opacity,
-						width: cell_size_x_m_1,
-						height: cell_size_y_m_1,
+						width: csm1.x,
+						height: csm1.y,
 						angle: conf.piece.bw[jj].in_pile.angle,
 						srcX: conf.piece.bw[jj].on_board.srcX,
 						srcY: 0,
-						srcWidth: cell_size_x_m_1,
-						srcHeight: cell_size_y_m_1,
+						srcWidth: csm1.x,
+						srcHeight: csm1.y,
 					},
 					initial: {
 						index: index,
@@ -121,7 +103,7 @@ function main() {
 				index++;
 				ii++;
 			}
-			y0 += 4.0 * cell_size_array[1] + 12;
+			y0 += cs[4] + 12;
 			jj++;
 		}
 		jj = 0;
@@ -168,3 +150,20 @@ function createBoard(x, y, w, h, scene) {
 		height: h
 	});
 }
+
+// var caster_joined = false;
+// g.game.join.add(function (ev) {
+// 	var player_index = 0;
+// 	if (!caster_joined) {
+// 		player.current[player_index] = player.new_propoeties(ev.player, player_index, g.game.age);
+// 		caster_joined = true;
+// 	}
+// });
+
+// scene.message.add(function(mes) {
+// 	if (mes === undefined) return;
+// 	if (mes.data === undefined) return;
+// 	if (mes.data.destination === undefined) return;
+// 	if (events[mes.data.destination] === undefined) return;
+// 	events[mes.data.destination](mes);
+// });

@@ -37,12 +37,7 @@ while (ii < conf.players.max_players) {
 }
 var scene;
 var admin = admin_control.admin;
-var cell_size_array            = [];
-var i = 0;
-while (i < 20) {
-	cell_size_array[i] = i * conf.board.cell.size.x;
-	i++;
-}
+var cs    = conf.cell.array;
 
 var login_controls             = [];
 var local_scene_player = [];
@@ -54,10 +49,22 @@ module.exports.view              = view;
 module.exports.admin             = admin;
 module.exports.semaphoe          = semaphoe;
 module.exports.player_operations = player_operations;
+module.exports.local_scene_player = local_scene_player;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function init() {
+	player.init();
+	var player_index = 0;
+	while (player_index < conf.players.max_players) {
+		local_scene_player[player_index] = new local_scene.player(player_index);
+		++player_index;
+	}
+	// console.log(local_scene_player[0]);
+}
+module.exports.init = init;
+
 function set_scene(sc) {
 	scene = sc;
-	message_event.init(sc);
+	message_event.set_scene(sc);
 	common_control.set_scene(sc);
 	confirm.set_scene(scene);
 	// commenting.set_scene(scene); 		// set destination of comment
@@ -65,6 +72,8 @@ function set_scene(sc) {
 	pointer.set_scene(scene);
 }
 module.exports.set_scene = set_scene;
+
+
 function set_player_objects(obj) { player_objects = obj;}
 module.exports.set_stack_objects = set_player_objects;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -158,17 +167,17 @@ var pointer_login = [];
 // function create(confirm_object) {
 function create() {
 	confirm_window = new confirm.create_window(1); // ci = 1 means checking player 1 only
-	// var camera_control = createCameraControl(cell_size_array[8], cell_size_array[8], cell_size_array[1], cell_size_array[1], conf.window_icon.camera);
+	// var camera_control = createCameraControl(cs[8], cs[8], cs[1], cs[1], conf.window_icon.camera);
 	// scene.append(camera_control);
-	var help_control       = help.create_control(g.game.width - cell_size_array[1], g.game.height - cell_size_array[1], cell_size_array[1], cell_size_array[1], conf.window_icon.help, []);
+	var help_control       = help.create_control(g.game.width - cs[1], g.game.height - cs[1], cs[1], cs[1], conf.window_icon.help, []);
 	scene.append(help_control);
-	var play_again_control = createPlayAgainControl(g.game.width - cell_size_array[1], g.game.height - cell_size_array[2], cell_size_array[1], cell_size_array[1], conf.window_icon.restart_game, confirm_window);
+	var play_again_control = createPlayAgainControl(g.game.width - cs[1], g.game.height - cs[2], cs[1], cs[1], conf.window_icon.restart_game, confirm_window);
 	scene.append(play_again_control);
 	var ii = 1;
 	while(ii < conf.players.max_players) {
 		var ypos = ii + 2;
 		var pind = conf.players.max_players - ii;
-		login_controls[pind] = createLoginControl(pind, g.game.width - cell_size_array[1], g.game.height - cell_size_array[ypos], cell_size_array[1], cell_size_array[1], conf.window_icon.login, confirm_window);
+		login_controls[pind] = createLoginControl(pind, g.game.width - cs[1], g.game.height - cs[ypos], cs[1], cs[1], conf.window_icon.login, confirm_window);
 		scene.append(login_controls[pind]);
 		ii++;
 	}
@@ -177,12 +186,11 @@ function create() {
 	status_bottom = new statusbar.bottom(conf.status_bar, scene);
 	module.exports.status_bottom = status_bottom;
 	if (conf.players.max_players > 1) scene.append(admin_control.create_control(
-		g.game.width - cell_size_array[1], g.game.height - cell_size_array[ypos+1], cell_size_array[1], cell_size_array[1], conf.window_icon.admin
+		g.game.width - cs[1], g.game.height - cs[ypos+1], cs[1], cs[1], conf.window_icon.admin
 	));
 
 	help.create_board(conf.help_board, 0, 0); // Help board
 
-	// pointer.set_scene(scene);
 	var player_index = 0;
 	while (player_index < conf.players.max_players) {
 		var jj = conf.window.max_pointers - 1;
@@ -194,12 +202,9 @@ function create() {
 		var p = new pointer.user(player_index, 0, conf.players.window_pointer[player_index]);
 		pointer_login[player_index] = p.pointer.children[1];
 		pointer.update_by_operation('on', player_index, undefined);
-		local_scene_player[player_index] = new local_scene.player(player_index);
 		++player_index;
 	}
 	player_index = player.find_index(g.game.player.id);
-	// console.log(local_scene_player[0]);
-	module.exports.local_scene_player = local_scene_player;
 }
 module.exports.create = create;
 module.exports.local_scene_player = local_scene_player;

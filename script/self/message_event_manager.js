@@ -26,7 +26,7 @@ function local_move_piece(mes) {return mes;}
 function local_place_piece(mes) {return mes;}
 function eval_function(mes) {return eval(mes.data.message);}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-function init(sc) {
+function set_scene(sc) {
 	scene = sc;
 	scene.message.add(function(mes) {
 		if (mes === undefined) return;
@@ -36,4 +36,4 @@ function init(sc) {
 		events[mes.data.destination](mes);
 	});
 }
-module.exports.init = init;
+module.exports.set_scene = set_scene;
