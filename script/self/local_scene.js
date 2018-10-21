@@ -22,10 +22,11 @@ var player = function(player_index) {
 	// this.scale = {x: 1.0, y: 1.0};
 	// this.inv_scale = {x: 1.0, y: 1.0};
 	// this.angle = 0.0;
-	this.local_zero = {x: 75.0, y: 50.0};
-	this.scale = {x: 2.0, y: 2.0};
-	this.inv_scale = {x: 0.5, y: 0.5};
-	this.angle = Math.PI / 3.0;
+	this.local_zero = {x: -20.0, y: -10.0};
+	this.scale = {x: 0.5, y: 0.5};
+	this.inv_scale = {x: 2.0, y: 2.0};
+	this.angle = Math.PI / 30.0;
+	this.angle360 = this.angle * 360.0 / (2.0 * Math.PI);
 	this.local_center = {x: game_center.x, y: game_center.y};
 	this.rotate = this.set_rotate_angle(this.angle);
 };
@@ -61,6 +62,14 @@ player.prototype.set_rotate_angle = function (rotate_angle) {
 			],
 		},
 	};
+};
+
+player.prototype.forward_xy = function (point) {
+	var p = a_mult_xy_p_v(this.rotate.forward, point); //x, y
+	p.scaleX = this.scale.x;
+	p.scaleY = this.scale.y;
+	p.angle = this.angle360;
+	return p;
 };
 
 player.prototype.forward = function (ev) {

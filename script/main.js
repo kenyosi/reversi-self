@@ -52,14 +52,13 @@ function main() {
 		// Board area
 		ii = 0;
 		while (ii < conf.piece.n) {
-			var xy = indTo2D(ii, conf.board.size.x);
-			scene.append(
-				createBoard(
-					cs[xy[0]] + conf.board.location.x0 + wm.view.position.x,
-					cs[xy[1]] + conf.board.location.y0 + wm.view.position.y,
-					csm1.x, csm1.y, scene
-				)
-			);
+			var xy_index = indTo2D(ii, conf.board.size.x);
+			var xy = {x: cs[xy_index[0]] + conf.board.location.x0 + wm.view.position.x, 
+				y: cs[xy_index[1]] + conf.board.location.y0 + wm.view.position.y};
+			var b = createBoard(xy.x, xy.y, csm1.x, csm1.y, scene);
+			scene.append(b);
+			// xy = wm.local_scene_player[0].forward_xy(xy);
+			// wm.draw_modified(b, xy);
 			++ii;
 		}
 
