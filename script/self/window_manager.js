@@ -53,9 +53,10 @@ module.exports.local_scene_player = local_scene_player;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function init() {
 	player.init();
+	local_scene_player[-1] = new local_scene.player(); // watcher without login
 	var player_index = 0;
 	while (player_index < conf.players.max_players) {
-		local_scene_player[player_index] = new local_scene.player(player_index);
+		local_scene_player[player_index] = new local_scene.player();
 		++player_index;
 	}
 	// console.log(local_scene_player[0]);

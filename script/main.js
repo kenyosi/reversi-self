@@ -26,6 +26,13 @@ function main() {
 	stack.set_scene(scene);
 	piece.set_scene(scene);
 	scene.loaded.add(function () {
+		// local view points
+		var player_index = -1;
+		// wm.local_scene_player[player_index].set_local_zero({x: -20.0, y: -10.0});
+		// wm.local_scene_player[player_index].set_scale({x: 0.5, y: 0.5});
+		// wm.local_scene_player[player_index].set_angle(2.0 * Math.PI / 30.0);
+		// wm.local_scene_player[player_index].set_local_scene();
+
 		// Pile areas
 		var pile_areas = [];
 		var lines_in_pile = 2;
@@ -53,12 +60,14 @@ function main() {
 		ii = 0;
 		while (ii < conf.piece.n) {
 			var xy_index = indTo2D(ii, conf.board.size.x);
-			var xy = {x: cs[xy_index[0]] + conf.board.location.x0 + wm.view.position.x, 
-				y: cs[xy_index[1]] + conf.board.location.y0 + wm.view.position.y};
-			var b = createBoard(xy.x, xy.y, csm1.x, csm1.y, scene);
+			var xywh = {
+				x: cs[xy_index[0]] + conf.board.location.x0 + wm.view.position.x, 
+				y: cs[xy_index[1]] + conf.board.location.y0 + wm.view.position.y,
+				width: csm1.x,
+				height: csm1.y
+			};
+			var b = createBoard(xywh, player_index, scene);
 			scene.append(b);
-			// xy = wm.local_scene_player[0].forward_xy(xy);
-			// wm.draw_modified(b, xy);
 			++ii;
 		}
 
@@ -138,15 +147,21 @@ function indTo2D(ii, dim) {
 	return cood;
 }
 
-function createBoard(x, y, w, h, scene) {
+function createBoard(p, player_index, scene) {
+	var local_p = wm.local_scene_player[player_index].forward_xy(p);
+	var local_scene = wm.local_scene_player[player_index];
 	return new g.FilledRect({
 		scene: scene,
 		cssColor: conf.default_label.cssColor,
 		opacity: conf.default_label.opacity,
-		x: x,
-		y: y,
-		width: w,
-		height: h
+		x: local_p.x,
+		y: local_p.y,
+		width: local_scene.scale.x * p.width,
+		height: local_scene.scale.y * p.height,
+		angle: local_scene.angle360,
+		tag: {
+			global: p
+		}
 	});
 }
 
