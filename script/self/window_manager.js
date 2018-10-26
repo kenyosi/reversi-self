@@ -57,6 +57,10 @@ module.exports.index_pp          = index_pp;
 module.exports.semaphoe          = semaphoe;
 module.exports.player_operations = player_operations;
 
+function init() {
+}
+module.exports.init = init;
+
 function set_scene(sc) {
 	scene = sc;
 	common_control.set_scene(sc);
