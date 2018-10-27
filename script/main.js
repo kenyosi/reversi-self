@@ -28,9 +28,9 @@ function main() {
 		// local view points
 		var player_index = -1;
 		// wm.local_scene_player[player_index].set_local_zero({x: +20.0, y: -10.0});
-		wm.local_scene_player[player_index].set_scale({x: 0.5, y: 0.5});
-		wm.local_scene_player[player_index].set_angle(2.0 * Math.PI / 8.0);
-		wm.local_scene_player[player_index].set_local_scene();
+		// wm.local_scene_player[player_index].set_scale({x: 0.5, y: 0.5});
+		// wm.local_scene_player[player_index].set_angle(2.0 * Math.PI / 8.0);
+		// wm.local_scene_player[player_index].set_local_scene();
 
 		// Pile areas
 		var pile_areas = [];
