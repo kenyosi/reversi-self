@@ -278,10 +278,12 @@ function place(ev, group, player_index) {
 			// commenting.post(message_here);
 		}
 	}
-	if (!status[group.id].events.process.wait()) return;
-	wm.draw_modified(group.children[0], conf.disk.unselect.background);
-	set_piles(group, status[group.id]);
-	status[group.id].events.process.signal();
+	else {
+		if (!status[group.id].events.process.wait()) return;
+		wm.draw_modified(group.children[0], conf.disk.unselect.background);
+		set_piles(group, status[group.id]);
+		status[group.id].events.process.signal();
+	}
 }
 function reverse(group) {
 	group.tag.bw = (group.tag.bw + 1) % 2;
