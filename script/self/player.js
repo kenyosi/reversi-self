@@ -45,7 +45,9 @@ function init() {
 	g.game.join.add(function (ev) {
 		var player_index = 0;
 		if (!caster_joined) {
-		// player.current[player_index] = player.new_propoeties(ev.player, player_index, g.game.age);
+			if (ev.player === undefined) {
+				return;
+			}
 			current[player_index] = new_propoeties(ev.player, player_index, g.game.age);
 			caster_joined = true;
 		}
@@ -59,7 +61,15 @@ module.exports.init = init;
 // module.exports.set_show_by_join = set_show_by_join;
 
 // Expensive part, should carefuley code this function, Ken Y.
+
+// function check_player_id(id) {
+// 	if (!id === undefined) return true;
+// 	wm.status_bottom.set_message('ごめんなさい、お使いの端末で動作しません', -2); // will create local message
+// 	return false;
+// }
+
 function validate_group(player, ci) {
+	if (player.id === undefined) return false;
 	ci = (ci === undefined ? 0 : ci);
 	var ii = validate_index[ci].st;
 	while (ii < validate_index[ci].en) {
@@ -79,6 +89,7 @@ module.exports.validate_group = validate_group;
 
 // Expensive part, should carefuley code this function, Ken Y.
 function validate_group_join(player, ci) {
+	if (player.id === undefined) return;
 	ci = (ci === undefined ? 0 : ci);
 	var current_time = g.game.age;
 	var f = [];
@@ -113,6 +124,7 @@ module.exports.validate_group_join = validate_group_join;
 
 // Expensive part, should carefuley code this function, Ken Y.
 function validate(player, ci) {
+	if (player.id === undefined) return false;
 	ci = (ci === undefined ? 0 : ci);
 	var ii = validate_index[ci].st;
 	while (ii < validate_index[ci].en) {
@@ -132,6 +144,7 @@ module.exports.validate = validate;
 
 // Expensive part, should carefuley code this function, Ken Y.
 function validate_join(player, ci) {
+	if (player.id === undefined) return false;
 	ci = (ci === undefined ? 0 : ci);
 	var current_time = g.game.age;
 	var f = [];
@@ -166,6 +179,7 @@ module.exports.validate_join = validate_join;
 
 function find_index(id, ci) {
 	// return 0;
+	if (id === undefined) return false;
 	ci = (ci === undefined ? 0 : ci);
 	var ii = validate_index[ci].st;
 	while (ii < validate_index[ci].en) {

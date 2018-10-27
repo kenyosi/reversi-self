@@ -12,7 +12,7 @@ var timeout_delta_frame        = 3 * g.game.fps;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
 var scene;
-// var commenting                 = require('commenting');
+// var commenting                 = require('./self/commenting');
 var process                    = require('./self/process');
 var player                     = require('./self/player');
 var pointer                    = require('./self/pointer');
