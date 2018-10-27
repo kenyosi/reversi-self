@@ -17,7 +17,7 @@ var messaging_manager          = [];
 // {'y': y0 - dy    , 'timestamp' : conf.const.old_unix_time}, ...}
 var i = 0;
 while(i < conf.comment.lines) {
-	messaging_manager[i] = {'y': conf.comment.y0 - i * conf.board.cell.size.y, 'timestamp': conf.const.old_unix_time};
+	messaging_manager[i] = {'y': conf.comment.y0 - i * conf.board.cell.size.y, 'timestamp': conf.const.old_time};
 	i++;
 }
 
@@ -45,10 +45,10 @@ function from_que () {
 }
 module.exports.from_que = from_que;
 
-function get_latest(current_unix_time) {
+function get_latest(current_time) {
 	var messaging_index = 0;
 	while (messaging_index < conf.comment.lines) {
-		if (current_unix_time - messaging_manager[messaging_index].timestamp > 0) return messaging_index;
+		if (current_time - messaging_manager[messaging_index].timestamp > 0) return messaging_index;
 		messaging_index++;
 	}
 	return messaging_index;
@@ -76,6 +76,7 @@ function create(mes_text) {
 	messaging_manager[messaging_index].timestamp
 	= current_age + ((-x_end) + comma_two_sec) / conf.comment.speed;
 	messaging.update.add(function() {
+
 		messaging.x -= conf.comment.speed;
 		if (messaging.x > x_end) messaging.modified();
 		else messaging.destroy();

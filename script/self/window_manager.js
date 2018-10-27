@@ -24,7 +24,7 @@ var admin_control              = require('./admin_control');
 var help                       = require('./help');
 var statusbar                  = require('./statusbar');
 var confirm                    = require('./confirm');
-// var commenting                 = require('./commenting');
+var commenting                 = require('./commenting');
 var local_scene                = require('./local_scene');
 var message_event              = require('./message_event_manager');
 var semaphoe                   = new process.semaphore(1);
@@ -68,7 +68,7 @@ function set_scene(sc) {
 	message_event.set_scene(sc);
 	common_control.set_scene(sc);
 	confirm.set_scene(scene);
-	// commenting.set_scene(scene); 		// set destination of comment
+	commenting.set_scene(scene);
 	help.set_scene(scene, view);
 	pointer.set_scene(scene);
 }
@@ -205,7 +205,11 @@ function create() {
 		pointer.update_by_operation('on', player_index, undefined);
 		++player_index;
 	}
-	player_index = player.find_index(g.game.player.id);
+	// player_index = player.find_index(g.game.player.id);
+	commenting.post('使い方は右下の[？]アイコンをタップ下さい');
+	if (player.caster_joined && !player.current[0].login) {
+		status_bottom.set_message('ごめんなさい、P1の環境で動作しません', -1);
+	}
 }
 module.exports.create = create;
 module.exports.local_scene_player = local_scene_player;

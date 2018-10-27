@@ -236,7 +236,7 @@ var comment = {
 	que:{size: 128},
 	speed: 2,
 	lines: 8,
-	y0: board.cell.size.y * 7 + 5,
+	y0: cs[8] + 5,
 	properies: {
 		fontSize: 16,
 		cssColor: 'white',

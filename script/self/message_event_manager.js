@@ -24,7 +24,7 @@ var events = {
 function local_get_piece(mes) {return mes;}
 function local_move_piece(mes) {return mes;}
 function local_place_piece(mes) {return mes;}
-function eval_function(mes) {return eval(mes.data.message);}
+function eval_function() {}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function set_scene(sc) {
 	scene = sc;
