@@ -242,7 +242,7 @@ var comment = {
 		cssColor: 'white',
 		opacity: 1.0,
 		strokeColor: 'black',
-		strokeWidth: 0.25
+		strokeWidth: 0.33
 	},
 };
 module.exports.comment = comment;
@@ -265,8 +265,7 @@ module.exports.status_bar = {
 
 var window = {
 	max_prevDelta: cs[2] * cs[2], // per frame
-	// max_multi_touch: 16,          // per player
-	max_pointers: 16,          // per player
+	max_pointers: 16,             // per player
 	max_multi_operation: 1,       // per player
 };
 module.exports.window = window;

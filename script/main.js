@@ -11,7 +11,6 @@ var conf                       = require('./content_config');
 var piece                      = require('./piece');
 var stack                      = require('./object_group');
 var set_inital_locations       = require('./set_initial_locations');
-// var player                     = require('./self/player');
 var wm                         = require('./self/window_manager');
 
 var cs = conf.cell.array;
@@ -164,20 +163,3 @@ function createBoard(p, player_index, scene) {
 		}
 	});
 }
-
-// var caster_joined = false;
-// g.game.join.add(function (ev) {
-// 	var player_index = 0;
-// 	if (!caster_joined) {
-// 		player.current[player_index] = player.new_propoeties(ev.player, player_index, g.game.age);
-// 		caster_joined = true;
-// 	}
-// });
-
-// scene.message.add(function(mes) {
-// 	if (mes === undefined) return;
-// 	if (mes.data === undefined) return;
-// 	if (mes.data.destination === undefined) return;
-// 	if (events[mes.data.destination] === undefined) return;
-// 	events[mes.data.destination](mes);
-// });
