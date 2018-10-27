@@ -15,8 +15,13 @@ var scene;
 function set_scene(sc) { scene = sc;}
 module.exports.set_scene = set_scene;
 
-var objects = function(x, y, w, h, style, f) {
+// var objects = function(x, y, w, h, style, f) {
+var objects = function(details, f) {
 	f = (f === undefined ? [0, 0, 0, 0] : f);
+	var global_player_index = -1;
+	var global_p = {x: details.x, y: details.y, width: details.width, height: details.height};
+	var local_p = wm.local_scene_player[global_player_index].forward_xy(global_p);
+	var local_scene = wm.local_scene_player[global_player_index];
 	this.max_pieces = co.pile_area.max_pieces;
 	this.min_dy    = 6; //4
 	this.group_id   = [];
@@ -26,24 +31,36 @@ var objects = function(x, y, w, h, style, f) {
 	var y0_fill    = 5;
 	this.area = new g.E({
 		scene: scene,
-		x: x,
-		y: y,
-		width: w,
-		height: h,
-		scaleX: 1,
-		scaleY: 1,
+		// x: details.x,
+		// y: details.y,
+		// width: details.width,
+		// height: details.height,
+		// scaleX: 1,
+		// scaleY: 1,
+		x: local_p.x,
+		y: local_p.y,
+		// x: local_p.x - (1.0 - local_scene.scale.x) * details.width / 2.0,
+		// y: local_p.y - (1.0 - local_scene.scale.y) * details.height / 2.0,
+		width: details.width,
+		height: details.height,
+		angle: local_scene.angle360,
+		scaleX: local_scene.scale.x,
+		scaleY: local_scene.scale.y,
 		touchable: false,
-		tag: { type: 'board'},
+		tag: {
+			type: 'board',
+			global: global_p,
+		},
 	});
 	this.area.append(
 		new g.FilledRect({
 			scene: scene,
-			cssColor: style.background.cssColor,
-			opacity: style.background.opacity,
+			cssColor: details.background.cssColor,
+			opacity: details.background.opacity,
 			x: x0_fill,
 			y: y0_fill,
-			width: w,// - x0_fill,
-			height: h - y0_fill
+			width: details.width,// - x0_fill,
+			height: details.height - y0_fill
 		}));
 	scene.append(this.area);
 	this.p = scene.children[scene.children.length - 1];

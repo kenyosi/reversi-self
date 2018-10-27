@@ -27,10 +27,10 @@ function main() {
 	scene.loaded.add(function () {
 		// local view points
 		var player_index = -1;
-		// wm.local_scene_player[player_index].set_local_zero({x: -20.0, y: -10.0});
-		// wm.local_scene_player[player_index].set_scale({x: 0.6, y: 0.6});
-		// wm.local_scene_player[player_index].set_angle(2.0 * Math.PI / 30.0);
-		// wm.local_scene_player[player_index].set_local_scene();
+		// wm.local_scene_player[player_index].set_local_zero({x: +20.0, y: -10.0});
+		wm.local_scene_player[player_index].set_scale({x: 0.5, y: 0.5});
+		wm.local_scene_player[player_index].set_angle(2.0 * Math.PI / 8.0);
+		wm.local_scene_player[player_index].set_local_scene();
 
 		// Pile areas
 		var pile_areas = [];
@@ -42,14 +42,17 @@ function main() {
 		while(ii < conf.piece.bw_n * lines_in_pile) {
 			var x_rem = ii % lines_in_pile;
 			var nx    = (ii - x_rem) / lines_in_pile;
-			pile_areas[ii] = new stack.objects(
-				x_rem * dx + conf.pile_area.location.x0 + wm.view.position.x,
-				nx * dy    + conf.pile_area.location.y0 + wm.view.position.y,
-				conf.pile_area.location.width,
-				conf.pile_area.location.height,
-				conf.pile_area,
-				flags[x_rem]
-			);
+			var details = {
+				x: x_rem * dx + conf.pile_area.location.x0 + wm.view.position.x,
+				y: nx * dy    + conf.pile_area.location.y0 + wm.view.position.y,
+				width: conf.pile_area.location.width,
+				height: conf.pile_area.location.height,
+				background: {
+					cssColor: conf.pile_area.background.cssColor,
+					opacity: conf.pile_area.background.opacity,
+				},
+			};
+			pile_areas[ii] = new stack.objects(details, flags[x_rem]);
 			ii++;
 		}
 		piece.set_pile_areas(pile_areas);
@@ -73,7 +76,8 @@ function main() {
 		// pieces in pile areas
 		var pieces_pp      = conf.piece.n / conf.piece.bw_n;
 		var pieces_in_line = pieces_pp / lines_in_pile;
-		var x0            = cs[15] - 0.2 * cs[1];
+		// var x0            = cs[15] - 0.2 * cs[1];
+		var x0            = cs[10] - 0.2 * cs[1];
 		var y0            = cs[4] - 6;
 		dx            = 1 + cs[1];
 		dy            = 6;
@@ -83,7 +87,7 @@ function main() {
 			ii = 0;
 			while(ii < pieces_pp) {
 				var dp = indTo2D(ii, [pieces_in_line]);
-				var details = {
+				details = {
 					x: x0 + dp[1] * dx + wm.view.position.x,
 					y: y0 - dp[0] * dy + wm.view.position.y,
 					bw: jj,
@@ -155,6 +159,8 @@ function createBoard(p, player_index, scene) {
 		opacity: conf.default_label.opacity,
 		x: local_p.x,
 		y: local_p.y,
+		// x: local_p.x - (1.0 - local_scene.scale.x) * p.width / 2.0,
+		// y: local_p.y - (1.0 - local_scene.scale.y) * p.height / 2.0,
 		// width: local_scene.scale.x * p.width,
 		// height: local_scene.scale.y * p.height,
 		width: p.width,

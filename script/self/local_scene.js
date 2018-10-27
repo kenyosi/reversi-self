@@ -23,11 +23,13 @@ module.exports.player = player;
 player.prototype.set_defualt = function () {
 	this.floating = false;
 	this.local_zero = {x: 0.0, y: 0.0};
+	this.global_zero = {x: 0.0, y: 0.0};
 	this.scale = {x: 1.0, y: 1.0};
 	this.inv_scale = {x: 1.0, y: 1.0};
 	this.angle = 0;
 	this.angle360 = 0;
 	this.local_center = {x: game_center.x, y: game_center.y};
+	this.global_center = {x: game_center.x, y: game_center.y};
 	this.set_local_scene();
 };
 
@@ -44,19 +46,29 @@ player.prototype.set_local_scene = function () {
 	// this.angle = rotate_angle;
 	var cos_r  = Math.cos(this.angle);
 	var sin_r  = Math.sin(this.angle);
-	var zc = [
-		this.local_zero.x + this.local_center.x,
-		this.local_zero.y + this.local_center.y
-	];
+	// var zc = [
+	// 	this.local_zero.x + this.local_center.x,
+	// 	this.local_zero.y + this.local_center.y
+	// ];
+	// var xc = [
+	// 	this.global_zero.x + this.global_center.x,
+	// 	this.global_zero.y + this.global_center.y
+	// ];
 	this.rotate = {
 		forward: {
 			matrix: [
 				[this.scale.x * cos_r, -this.scale.y * sin_r],
-				[this.scale.x * sin_r,  this.scale.y * cos_r]
+				[this.scale.x * sin_r,  this.scale.y * cos_r],
+				// [cos_r, -sin_r],
+				// [sin_r,  cos_r],
 			],
 			vector: [
-				-( cos_r * zc[0] - sin_r * zc[1]) + this.local_center.x,
-				-( sin_r * zc[0] + cos_r * zc[1]) + this.local_center.y
+				// -( cos_r * zc[0] - sin_r * zc[1]) + this.local_center.x,
+				// -( sin_r * zc[0] + cos_r * zc[1]) + this.local_center.y,
+				-(this.scale.x * cos_r * this.global_center.x - this.scale.y * sin_r * this.global_center.y) + this.local_center.x ,
+				-(this.scale.x * sin_r * this.global_center.x + this.scale.y * cos_r * this.global_center.y) + this.local_center.y,
+				// this.scale.x *(-( cos_r * zc[0] - sin_r * zc[1]) + this.local_center.x),
+				// this.scale.y *(-( sin_r * zc[0] + cos_r * zc[1]) + this.local_center.y)
 			],
 		},
 		inverse: {
@@ -65,15 +77,29 @@ player.prototype.set_local_scene = function () {
 				[-this.inv_scale.y * sin_r, this.inv_scale.y * cos_r]
 			],
 			vector: [
-				this.inv_scale.x * (-( cos_r * this.local_center.x + sin_r * this.local_center.y) + zc[0]),
-				this.inv_scale.y * (-(-sin_r * this.local_center.x + cos_r * this.local_center.y) + zc[1])
+				this.inv_scale.x * (-( cos_r * this.local_center.x + sin_r * this.local_center.y) + this.global_center.x),
+				this.inv_scale.y * (-(-sin_r * this.local_center.x + cos_r * this.local_center.y) + this.global_center.y)
 			],
 		},
 	};
 };
 
 player.prototype.forward_xy = function (point) {
+	var wh = {
+		x: point.width  / 2.0,
+		y: point.height / 2.0
+	};
+	var whr = a_mult_xy(this.rotate.forward, wh); //x, y
+	var w = {
+		x: wh.x - whr.x,
+		y: wh.y - whr.y
+	};
 	var p = a_mult_xy_p_v(this.rotate.forward, point); //x, y
+	// var p1 = a_mult_xy_p_v(this.rotate.forward, this.local_center); //x, y
+	// p.x =  p.x - w.x - (p1.x - this.local_center.x);
+	// p.y =  p.y - w.y - (p1.y - this.local_center.y);
+	p.x =  p.x - w.x;
+	p.y =  p.y - w.y;
 	p.scaleX = this.scale.x;
 	p.scaleY = this.scale.y;
 	p.angle = this.angle360;
@@ -81,8 +107,11 @@ player.prototype.forward_xy = function (point) {
 };
 
 player.prototype.forward = function (ev) {
+	var point = a_mult_xy_p_v(this.rotate.forward, ev.point);
+	// point.x *=  this.scale.x;
+	// point.y *=  this.scale.y;
 	return {
-		point: a_mult_xy_p_v(this.rotate.forward, ev.point),
+		point: point,
 		startDelta: a_mult_xy(this.rotate.forward, ev.startDelta),
 		prevDelta: a_mult_xy(this.rotate.forward, ev.prevDelta),
 		player: {id: ev.player.id,},
@@ -90,8 +119,12 @@ player.prototype.forward = function (ev) {
 	};
 };
 player.prototype.forward_down = function (ev) {
+	var point = a_mult_xy_p_v(this.rotate.forward, ev.point);
+	// point.x *=  this.scale.x;
+	// point.y *=  this.scale.y;
 	return {
-		point: a_mult_xy_p_v(this.rotate.forward, ev.point),
+		// point: a_mult_xy_p_v(this.rotate.forward, ev.point),
+		point: point,
 		startDelta: {x: 0, y: 0},
 		prevDelta: {x: 0, y: 0},
 		player: {id: ev.player.id,},
