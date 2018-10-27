@@ -151,23 +151,19 @@ function indTo2D(ii, dim) {
 }
 
 function createBoard(p, player_index, scene) {
-	var local_p = wm.local_scene_player[player_index].forward_xy(p);
-	var local_scene = wm.local_scene_player[player_index];
+	var local_p = wm.local_scene_player[player_index].rect_forward_init(p);
+	// local_p = wm.local_scene_player[player_index].rect_inverse_init(local_p);
 	return new g.FilledRect({
 		scene: scene,
 		cssColor: conf.default_label.cssColor,
 		opacity: conf.default_label.opacity,
 		x: local_p.x,
 		y: local_p.y,
-		// x: local_p.x - (1.0 - local_scene.scale.x) * p.width / 2.0,
-		// y: local_p.y - (1.0 - local_scene.scale.y) * p.height / 2.0,
-		// width: local_scene.scale.x * p.width,
-		// height: local_scene.scale.y * p.height,
-		width: p.width,
-		height: p.height,
-		angle: local_scene.angle360,
-		scaleX: local_scene.scale.x,
-		scaleY: local_scene.scale.y,
+		width: local_p.width,
+		height: local_p.height,
+		angle: local_p.angle360,
+		scaleX: local_p.scaleX,
+		scaleY: local_p.scaleY,
 		tag: {
 			global: p
 		}

@@ -20,7 +20,7 @@ var objects = function(details, f) {
 	f = (f === undefined ? [0, 0, 0, 0] : f);
 	var global_player_index = -1;
 	var global_p = {x: details.x, y: details.y, width: details.width, height: details.height};
-	var local_p = wm.local_scene_player[global_player_index].forward_xy(global_p);
+	var local_p = wm.local_scene_player[global_player_index].rect_forward_init(global_p);
 	var local_scene = wm.local_scene_player[global_player_index];
 	this.max_pieces = co.pile_area.max_pieces;
 	this.min_dy    = 6; //4

@@ -57,16 +57,16 @@ player.prototype.set_local_scene = function () {
 	this.rotate = {
 		forward: {
 			matrix: [
-				[this.scale.x * cos_r, -this.scale.y * sin_r],
-				[this.scale.x * sin_r,  this.scale.y * cos_r],
+				[cos_r * this.scale.x, -sin_r * this.scale.y],
+				[sin_r * this.scale.x,  cos_r * this.scale.y],
 				// [cos_r, -sin_r],
 				// [sin_r,  cos_r],
 			],
 			vector: [
 				// -( cos_r * zc[0] - sin_r * zc[1]) + this.local_center.x,
 				// -( sin_r * zc[0] + cos_r * zc[1]) + this.local_center.y,
-				-(this.scale.x * cos_r * this.global_center.x - this.scale.y * sin_r * this.global_center.y) + this.local_center.x ,
-				-(this.scale.x * sin_r * this.global_center.x + this.scale.y * cos_r * this.global_center.y) + this.local_center.y,
+				-(cos_r * this.scale.x * this.global_center.x - sin_r * this.scale.y * this.global_center.y) + this.local_center.x ,
+				-(sin_r * this.scale.x * this.global_center.x + cos_r * this.scale.y * this.global_center.y) + this.local_center.y,
 				// this.scale.x *(-( cos_r * zc[0] - sin_r * zc[1]) + this.local_center.x),
 				// this.scale.y *(-( sin_r * zc[0] + cos_r * zc[1]) + this.local_center.y)
 			],
@@ -77,33 +77,76 @@ player.prototype.set_local_scene = function () {
 				[-this.inv_scale.y * sin_r, this.inv_scale.y * cos_r]
 			],
 			vector: [
-				this.inv_scale.x * (-( cos_r * this.local_center.x + sin_r * this.local_center.y) + this.global_center.x),
-				this.inv_scale.y * (-(-sin_r * this.local_center.x + cos_r * this.local_center.y) + this.global_center.y)
+				this.inv_scale.x * (-( cos_r * this.local_center.x + sin_r * this.local_center.y)) + this.global_center.x,
+				this.inv_scale.y * (-(-sin_r * this.local_center.x + cos_r * this.local_center.y)) + this.global_center.y
 			],
 		},
 	};
 };
 
-player.prototype.forward_xy = function (point) {
+player.prototype.calc_rect_part = function(p) {
 	var wh = {
-		x: point.width  / 2.0,
-		y: point.height / 2.0
+		x: p.width  / 2.0,
+		y: p.height / 2.0
 	};
 	var whr = a_mult_xy(this.rotate.forward, wh); //x, y
 	var w = {
 		x: wh.x - whr.x,
 		y: wh.y - whr.y
 	};
-	var p = a_mult_xy_p_v(this.rotate.forward, point); //x, y
-	// var p1 = a_mult_xy_p_v(this.rotate.forward, this.local_center); //x, y
-	// p.x =  p.x - w.x - (p1.x - this.local_center.x);
-	// p.y =  p.y - w.y - (p1.y - this.local_center.y);
-	p.x =  p.x - w.x;
-	p.y =  p.y - w.y;
+	return w;
+};
+
+player.prototype.rect_forward_init = function (rect) {
+	var w = this.calc_rect_part(rect);
+	var p = a_mult_xy_p_v(this.rotate.forward, rect); //x, y
+	p = amb(p, w);
+	p.width = rect.width;
+	p.height = rect.height;
 	p.scaleX = this.scale.x;
 	p.scaleY = this.scale.y;
-	p.angle = this.angle360;
+	p.angle = this.angle;
+	p.angle360 = this.angle360;
 	return p;
+};
+
+player.prototype.rect_inverse_init = function (rect) {
+	var w = this.calc_rect_part(rect); // this is not optimzed one
+	var p = apb(rect, w);
+	p = a_mult_xy_p_v(this.rotate.inverse, p);
+	p.width = rect.width;
+	p.height = rect.height;
+	p.scaleX = 1; //comes from this.inv_scale.x;
+	p.scaleY = 1; //comes from this.inv_scale.y;
+	p.angle  = 0; // comes from this.angle360
+	p.angle360 = 0; //this.angle360;
+	return p;
+};
+
+player.prototype.rect_forward = function (ev, rect) {
+	var w = this.calc_rect_part(rect);
+	var p = a_mult_xy_p_v(this.rotate.forward, ev.point); //x, y
+	p = amb(p, w);
+	return {
+		point: p,
+		startDelta: a_mult_xy(this.rotate.forward, ev.startDelta),
+		prevDelta: a_mult_xy(this.rotate.forward, ev.prevDelta),
+		player: {id: ev.player.id,},
+		pointerId: ev.pointerId,
+	};
+};
+
+player.prototype.rect_forward_down = function (ev, rect) {
+	var w = this.calc_rect_part(rect);
+	var p = a_mult_xy_p_v(this.rotate.forward, ev.point); //x, y
+	p = amb(p, w);
+	return {
+		point: p,
+		startDelta: {x: 0, y: 0},
+		prevDelta: {x: 0, y: 0},
+		player: {id: ev.player.id,},
+		pointerId: ev.pointerId,
+	};
 };
 
 player.prototype.forward = function (ev) {
@@ -152,8 +195,8 @@ player.prototype.inverse_down = function (ev) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // function vcmult(a, b) {return {x: a.x * b.x, y: a.y * b.y};} // Multiply scalars in vector returns a vector
-// function apb(a, b) {return {x: a.x + b.x, y: a.y + b.y};}    // a+b, Add two vectors
-// function amb(a, b) {return {x: a.x - b.x, y: a.y - b.y};}    // a-b, Substruct vector
+function apb(a, b) {return {x: a.x + b.x, y: a.y + b.y};}    // a+b, Add two vectors
+function amb(a, b) {return {x: a.x - b.x, y: a.y - b.y};}    // a-b, Substruct vector
 function a_mult_xy(a, xy) {
 	// Multiply scalars in vector returns a vector
 	return {
