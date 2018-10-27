@@ -39,8 +39,6 @@ var objects = function(details, f) {
 		// scaleY: 1,
 		x: local_p.x,
 		y: local_p.y,
-		// x: local_p.x - (1.0 - local_scene.scale.x) * details.width / 2.0,
-		// y: local_p.y - (1.0 - local_scene.scale.y) * details.height / 2.0,
 		width: details.width,
 		height: details.height,
 		angle: local_scene.angle360,
