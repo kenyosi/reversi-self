@@ -8,9 +8,6 @@ var conf                       = require('./content_config');
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
-var player                     = require('./self/player');
-// var pointer                    = require('./self/pointer');
-var commenting                 = require('./self/commenting');
 var piece                      = require('./piece');
 var stack                      = require('./object_group');
 var wm                         = require('./self/window_manager');
@@ -25,47 +22,15 @@ while (i < 20) {
 var cell_size_x_m_1            = conf.board.cell.size.x - 1;
 var cell_size_y_m_1            = conf.board.cell.size.y - 1;
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-var events = {
-	// pointer_other_local_down: pointer.other_local_down,
-	// pointer_other_local_move: pointer.other_local_move,
-	// pointer_other_local_up: pointer.other_local_up,
-	eval_function: eval_function,
-	// get_piece: local_get_piece,
-	// move_piece: local_move_piece,
-	// place_piece: local_place_piece,
-};
-function eval_function() {}
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 function main() {
 	wm.init();
-	var caster_joined = false;
-	var caster_validated = false;
-	g.game.join.add(function (ev) {
-		var player_index = 0;
-		if (!caster_joined) {
-			caster_joined = true;
-			if (ev.player === undefined) {
-				return;
-			}
-			player.current[player_index] = player.new_propoeties(ev.player, player_index, g.game.age);
-			// caster_joined = true;
-			caster_validated = true;
-			// caster_validated = false;
-		}
-	});
-	var scene = new g.Scene({game: g.game, assetIds: ['reversi_disk', 'window_manager_icons', 'help_screen', 'help_screen_solo']});
-	scene.message.add(function(mes) {
-		if (mes === undefined) return;
-		if (mes.data === undefined) return;
-		if (mes.data.destination === undefined) return;
-		if (events[mes.data.destination] === undefined) return;
-		events[mes.data.destination](mes);
+	var scene = new g.Scene({game: g.game, assetIds: 
+		['reversi_disk', 'window_manager_icons', 'help_screen', 'help_screen_solo']
 	});
 	wm.set_scene(scene);         		      // set window manager in scene
 	stack.set_scene(scene);				      // set stack disks in scene
 	piece.set_scene(scene);				      // set disks in scene
-	commenting.set_scene(scene);              // set message manager in scene
 	scene.loaded.add(function () {
 		// Pile areas
 		var pile_areas = [];
@@ -166,14 +131,7 @@ function main() {
 		set_inital_locations.set_initial_object_locations(initial_disk_locations);
 
 		// Create window manager
-		scene.setTimeout(function() {
-			wm.create();
-			// commenting.post('コマはタップすると反転します');
-			commenting.post('使い方は右下の[？]アイコンをタップ下さい');
-			if (caster_joined && !caster_validated) {
-				wm.status_bottom.set_message('ごめんなさい、P1の環境で動作しません', -1);
-			}
-		}, 100);
+		scene.setTimeout(function() {wm.create();}, 100);
 	});
 	g.game.pushScene(scene);
 }

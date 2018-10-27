@@ -21,9 +21,9 @@ var events = {
 };
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-function eval_function(mes) {return eval(mes.data.message);}
+function eval_function() {}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-function init(sc) {
+function set_scene(sc) {
 	scene = sc;
 	scene.message.add(function(mes) {
 		if (mes === undefined) return;
@@ -33,4 +33,4 @@ function init(sc) {
 		events[mes.data.destination](mes);
 	});
 }
-module.exports.init = init;
+module.exports.set_scene = set_scene;
