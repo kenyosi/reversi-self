@@ -9,24 +9,23 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
 var pointer                    = require('./pointer');
+var piece                      = require('../piece');
 var scene;
-var events = {
-	pointer_other_local_down: pointer.other_local_down,
-	pointer_other_local_move: pointer.other_local_move,
-	pointer_other_local_up: pointer.other_local_up,
-	eval_function: eval_function,
-	get_piece: local_get_piece,
-	move_piece: local_move_piece,
-	place_piece: local_place_piece,
-};
+var events; // should define in set_scene not here, or missing piece.other_local_down
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-function local_get_piece(mes) {return mes;}
-function local_move_piece(mes) {return mes;}
-function local_place_piece(mes) {return mes;}
 function eval_function() {}
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function set_scene(sc) {
+	events = {
+		piece_other_local_down: piece.other_local_down,
+		piece_other_local_move: piece.other_local_move,
+		piece_other_local_up: piece.other_local_up,
+		pointer_other_local_down: pointer.other_local_down,
+		pointer_other_local_move: pointer.other_local_move,
+		pointer_other_local_up: pointer.other_local_up,
+		eval_function: eval_function,
+	};
 	scene = sc;
 	scene.message.add(function(mes) {
 		if (mes === undefined) return;

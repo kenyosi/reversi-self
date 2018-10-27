@@ -64,14 +64,25 @@ boundary.prototype.force = function (ev, xy) {
 };
 
 function create(details) {
+	var global_player_index = -1;
+	var global_p = {x: details.x, y: details.y, width: details.width, height: details.height};
+	var local_p = wm.local_scene_player[global_player_index].forward_xy(global_p);
+	var local_scene = wm.local_scene_player[global_player_index];
 	var group = new g.E({
 		scene: scene,
-		x: details.x,
-		y: details.y,
+		// x: details.x,
+		// y: details.y,
+		// width: details.width,
+		// height: details.height,
+		// scaleX: 0.5,
+		// scaleY: 1,
+		x: local_p.x,
+		y: local_p.y,
 		width: details.width,
 		height: details.height,
-		scaleX: 1,
-		scaleY: 1,
+		angle: local_scene.angle360,
+		scaleX: local_scene.scale.x,
+		scaleY: local_scene.scale.y,
 		touchable: true,
 		tag: {
 			type: 'piece',
@@ -84,6 +95,7 @@ function create(details) {
 				x: details.x,
 				y: details.y,
 			},
+			global: global_p,
 		},
 	});
 	var ii = 0;
@@ -110,83 +122,91 @@ function create(details) {
 			while (ii < conf.players.max_players) {
 				if ((group.tag.last[ii].timestamp + g.game.age) % g.game.fps == 0) {
 					if(group.tag.last[ii].timestamp + timeout_delta_frame < g.game.age) {
+						// up(ii, ev, group);
 						var ev = group.tag.last[ii].ev;
-						place(ev, group, ii);
+						if (ev === undefined) break;
+						var message = create_message(ev, group);
+						var index = message.index;
+						var ev_sync = wm.local_scene_player[index.player].inverse(ev);
+						up(ii, ev_sync, group); //not fire other_local
+						// fire_other_local('piece_other_local_up', index, ev_sync);
 					}
 				}
 				ii++;
 			}
 		}
 	});
-	group.pointDown.add(function (ev) {
-		if ((wm.admin.control && player.get_group(ev.player.id) != 'admin')) return;
-		if (!wm.semaphoe.status()) return;
-		if (!player.validate_join(ev.player, 0)) return;
-		if (!status[group.id].events.process.status()) return;
+	function down_move_point_event(ev, group) {
+		if ((wm.admin.control && player.get_group(ev.player.id) != 'admin')) return false;
+		if (!wm.semaphoe.status()) return false;
+		if (!player.validate_join(ev.player, 0)) return false;
+		if (!status[group.id].events.process.status()) return false;
+		if (ev.pointerId > conf.window.max_pointers) return false;
+		return create_message(ev, group);
+	}
+	function create_message(ev, group) {
 		var player_index = player.find_index(ev.player.id);
-		if (!wm.player_operations[player_index].wait()) return;
-		status[group.id].pointdown.in_board[player_index]  = get_address_in_board(group).validate;
-		status[group.id].pointdown.boundary[player_index].set_start(group);
-		set_last_status(1, player_index, ev, group);// required
-		set_initial_pressed(player_index, group);
+		var xy = get_absolute_position(ev);
+		ev.point.x = xy.x;
+		ev.point.y = xy.y;
+		return {
+			index: {
+				player: player_index,
+				pointer: ev.pointerId,
+				piece: group.id,
+			},
+		};
+	}
+	group.pointDown.add(function (ev) {
+		var message = down_move_point_event(ev, group);
+		if (message === false) return;
+		var index = message.index;
+		if (!wm.player_operations[index.player].wait()) return;
+
+		var ev_sync = wm.local_scene_player[index.player].inverse_down(ev);
+		status[group.id].pointdown.in_board[index.player] = get_address_in_board(group).validate;
+		status[group.id].pointdown.boundary[index.player].set_start(group);
+		// down(index.player, ev, group);
+		fire_other_local('piece_other_local_down', index, ev_sync);
+
 	});
 	group.pointMove.add(function (ev) {
-		if ((wm.admin.control && player.get_group(ev.player.id) != 'admin')) return;
-		if (!wm.semaphoe.status()) return;
-		if (!player.validate_join(ev.player, 0)) return;
-		if (!status[group.id].events.process.status()) return;
-		var player_index = player.find_index(ev.player.id);
+		var message = down_move_point_event(ev, group);
+		if (message === false) return;
+		var index = message.index;
+
 		//resume process
-		if (!status[group.id].pointdown.processed[player_index].status()) { 
-			if (!wm.player_operations[player_index].wait()) return;
-			set_last_status(1, player_index, ev, group);// required
-			set_initial_pressed(player_index, group);
+		if (!status[group.id].pointdown.processed[index.player].status()) { 
+			if (!wm.player_operations[index.player].wait()) return;
+			// down(index.player, ev, group);
+			var ev_sync = wm.local_scene_player[index.player].inverse_down(ev);
+			fire_other_local('piece_other_local_down', index, ev_sync);
 			return;
 		}
-		if (!status[group.id].pointdown.processed[player_index].status()) return;
+		if (!status[group.id].pointdown.processed[index.player].status()) return;
 		if (!status[group.id].events.process.status()) return;
-		set_last_status(0, player_index, ev, group);
-		// force place piece if rapid movement. Check if this is required carefully.
-		// var dxy = ev.prevDelta.x * ev.prevDelta.x + ev.prevDelta.y * ev.prevDelta.y
-		// if (dxy > conf.window.max_prevDelta || true) {
-		// place(ev, group);
-		// return
-		// }
-		if (!wm.view.floating) {
-			// group = status[group.id].pointdown.boundary[player_index].force(ev, group);
-			var xy = {x: 0, y: 0};
-			ii = 0;
-			while (ii < conf.players.max_players) {
-				if (status[group.id].pointdown.processed[ii].status()) {
-					var pxy = {x: 0, y: 0};
-					pxy = status[group.id].pointdown.boundary[ii].force(group.tag.last[ii].ev, pxy);
-					xy.x += pxy.x;
-					xy.y += pxy.y;
-				}
-				ii++;
-			}
-			group.x = xy.x / group.tag.pointer_pressed;
-			group.y = xy.y / group.tag.pointer_pressed;
-		}
-		else {
-			group.x -= ev.prevDelta.x;
-			group.y -= ev.prevDelta.y;
-		}
-		group.modified();
+		// move(index.player, ev, group);
+		ev_sync = wm.local_scene_player[index.player].inverse(ev);
+		fire_other_local('piece_other_local_move', index, ev_sync);
 	});
 	group.pointUp.add(function (ev) {
 		if (!player.validate(ev.player, 0)) return;
-		var player_index = player.find_index(ev.player.id);
 		if ((wm.admin.control && player.get_group(ev.player.id) != 'admin')) return;
 		if (!wm.semaphoe.status()) return;
 		if (!status[group.id].events.process.status()) return;
 		if (group.tag.pointer_pressed <=0) return;
-		place(ev, group, player_index);
+		// var player_index = player.find_index(ev.player.id);
+		// up(ev, group, player_index);
+		var message = create_message(ev, group);
+		var index = message.index;
+		var ev_sync = wm.local_scene_player[index.player].inverse(ev);
+		fire_other_local('piece_other_local_up', index, ev_sync);
 	});
 	scene.append(group);
 	group_id.push(group.id);
 	index.push(scene.children.length - 1);
 	status[group.id] = {
+		p_piece: group,
 		pointdown: {
 			in_process: new process.semaphore(1),
 			processed: [],
@@ -226,6 +246,7 @@ function set_last_status(counter_pressed, player_index, ev, group) {
 		y: group.y,
 		pointerId: ev.pointerId,
 		startDelta: startDeltaStable,
+		player: ev.player,
 	};
 }
 function set_initial_pressed(player_index, group) {
@@ -244,8 +265,107 @@ function set_initial_pressed(player_index, group) {
 	wm.draw_modified(group.children[0], conf.players.item.operating[player_index]); // <---
 	last[player_index] = group;
 }
+function fire_other_local(function_name, index, ev) {
+	// index.player = 1; // test, should consider ev.delta zero is different between 0 and 1
+	var mes = {
+		data: {
+			destination: function_name,
+			index: index,
+			ev: ev,
+		}
+	};
+	scene.message.fire(mes);
+	return mes;
+}
 
-function place(ev, group, player_index) {
+function other_local_down(message) {
+	// pointer_other_local_down as destination in message event in message_eventmanager.js
+	var index = message.data.index;
+	var ev = wm.local_scene_player[index.player].forward_down(message.data.ev);
+	//<--- development
+	// if (index.player === player.find_index(ev.player.id)) return;
+	down(index.player, ev, status[index.piece].p_piece);
+}
+module.exports.other_local_down = other_local_down;
+
+function other_local_move(message) {
+	// pointer_other_local_down as destination in message event in message_eventmanager.js
+	var index = message.data.index;
+	var ev = wm.local_scene_player[index.player].forward(message.data.ev);
+	//<--- development
+	// if (index.player === player.find_index(ev.player.id)) return;
+	move(index.player, ev, status[index.piece].p_piece);
+}
+module.exports.other_local_move = other_local_move;
+
+function other_local_up(message) {
+	// pointer_other_local_down as destination in message event in message_eventmanager.js
+	var index = message.data.index;
+	var ev = wm.local_scene_player[index.player].forward(message.data.ev);
+	//<--- development
+	// if (index.player === player.find_index(ev.player.id)) return;
+	up(index.player, ev, status[index.piece].p_piece);
+	// up(ev, group, player_index);
+}
+module.exports.other_local_up = other_local_up;
+
+
+function reverse(group) {
+	group.tag.bw = (group.tag.bw + 1) % 2;
+	var ai = 0;
+	var length_animation = conf.piece.bw[group.tag.bw].transit.length;
+	var intervalId = scene.setInterval(function () {
+		wm.draw_modified(group.children[1], conf.piece.bw[group.tag.bw].transit[ai]);
+		++ai;
+		if (ai >= length_animation) {
+			scene.clearInterval(intervalId);
+			scene.setTimeout(function () {
+				wm.draw_modified(group.children[1], conf.piece.bw[group.tag.bw].on_board);
+				wm.draw_modified(group.children[0], conf.piece.unselect.background);
+				set_piles(group, status[group.id]);
+				status[group.id].events.process.signal();
+			},  conf.piece.bw[group.tag.bw].transit_time);
+		}
+	}, conf.piece.bw[group.tag.bw].transit_time);
+	// var message_here = (group.tag.bw == 0 ? '黒' :'白') + 'に@P' + wm.index_pp[player_index];
+	// if (xy.validate) message_here = conf.board.an.x[xy.x] + conf.board.an.y[xy.y] + 'を' + message_here;
+	// commenting.post(message_here);
+}
+
+function down(player_index, ev, group) {
+	set_last_status(1, player_index, ev, group);// required
+	set_initial_pressed(player_index, group);
+}
+function move(player_index, ev, group) {
+	set_last_status(0, player_index, ev, group);
+	// Force up piece if it's rapid movement. Check if this is required carefully.
+	// var dxy = ev.prevDelta.x * ev.prevDelta.x + ev.prevDelta.y * ev.prevDelta.y
+	// if (dxy > conf.window.max_prevDelta || true) {
+	// up(player_index, ev, group);
+	// return
+	// }
+	if (!wm.view.floating) {
+		var xy = {x: 0, y: 0};
+		var ii = 0;
+		while (ii < conf.players.max_players) {
+			if (status[group.id].pointdown.processed[ii].status()) {
+				var pxy = {x: 0, y: 0};
+				pxy = status[group.id].pointdown.boundary[ii].force(group.tag.last[ii].ev, pxy);
+				xy.x += pxy.x;
+				xy.y += pxy.y;
+			}
+			ii++;
+		}
+		group.x = xy.x / group.tag.pointer_pressed;
+		group.y = xy.y / group.tag.pointer_pressed;
+	}
+	else {
+		group.x -= ev.prevDelta.x;
+		group.y -= ev.prevDelta.y;
+	}
+	group.modified();
+}
+function up(player_index, ev, group) {
 	if (!status[group.id].pointdown.processed[player_index].wait()) return;
 	if (!wm.player_operations[player_index].signal()) return;
 	--player.current[player_index].player_plate;
@@ -285,27 +405,6 @@ function place(ev, group, player_index) {
 		status[group.id].events.process.signal();
 	}
 }
-function reverse(group) {
-	group.tag.bw = (group.tag.bw + 1) % 2;
-	var ai = 0;
-	var length_animation = conf.piece.bw[group.tag.bw].transit.length;
-	var intervalId = scene.setInterval(function () {
-		wm.draw_modified(group.children[1], conf.piece.bw[group.tag.bw].transit[ai]);
-		++ai;
-		if (ai >= length_animation) {
-			scene.clearInterval(intervalId);
-			scene.setTimeout(function () {
-				wm.draw_modified(group.children[1], conf.piece.bw[group.tag.bw].on_board);
-				wm.draw_modified(group.children[0], conf.piece.unselect.background);
-				set_piles(group, status[group.id]);
-				status[group.id].events.process.signal();
-			},  conf.piece.bw[group.tag.bw].transit_time);
-		}
-	}, conf.piece.bw[group.tag.bw].transit_time);
-	// var message_here = (group.tag.bw == 0 ? '黒' :'白') + 'に@P' + wm.index_pp[player_index];
-	// if (xy.validate) message_here = conf.board.an.x[xy.x] + conf.board.an.y[xy.y] + 'を' + message_here;
-	// commenting.post(message_here);
-}
 
 function to_top(id, pieces) {
 	var this_group_id_index = group_id.indexOf(id);
@@ -323,8 +422,10 @@ module.exports.to_top = to_top;
 
 function get_address_in_board(d) {
 	var address = {};
-	var x = d.x - conf.board.location.x0 - wm.view.position.x;
-	var y = d.y - conf.board.location.y0 - wm.view.position.y;
+	// var x = d.x - conf.board.location.x0 - wm.view.position.x;
+	// var y = d.y - conf.board.location.y0 - wm.view.position.y;
+	var x = d.tag.global.x - conf.board.location.x0 - wm.view.position.x;
+	var y = d.tag.global.y - conf.board.location.y0 - wm.view.position.y;
 	address.x = parseInt(x / (conf.board.cell.size.x * wm.view.zoom) + 0.5);
 	address.y = parseInt(y / (conf.board.cell.size.y * wm.view.zoom) + 0.5);
 	address.validate = (
@@ -366,6 +467,17 @@ function set_piles(d) {
 		}
 	}
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function get_absolute_position(ev) {
+	if (ev.target === undefined)    return {x: ev.point.x, y: ev.point.y};
+	if (ev.target.parent === scene) return {x: ev.point.x + ev.target.x, y: ev.point.y + ev.target.y};
+	return {
+		x: ev.point.x + ev.target.x + ev.target.parent.x,
+		y: ev.point.y + ev.target.y + ev.target.parent.y
+	};
+}
+
 // function move(xy, d, transit_time = 20, s = [1.0,   1.5,   2.0,   2.5,   3.0,   2.5,   2.0,   1.5,   1.25,  1.0]) {
 // 	var d0 = {'x': d.x, 'y': d.y};
 // 	var x_index = d.tag.bw;

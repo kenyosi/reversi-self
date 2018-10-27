@@ -28,7 +28,7 @@ function main() {
 		// local view points
 		var player_index = -1;
 		// wm.local_scene_player[player_index].set_local_zero({x: -20.0, y: -10.0});
-		// wm.local_scene_player[player_index].set_scale({x: 0.5, y: 0.5});
+		// wm.local_scene_player[player_index].set_scale({x: 0.6, y: 0.6});
 		// wm.local_scene_player[player_index].set_angle(2.0 * Math.PI / 30.0);
 		// wm.local_scene_player[player_index].set_local_scene();
 
@@ -155,9 +155,13 @@ function createBoard(p, player_index, scene) {
 		opacity: conf.default_label.opacity,
 		x: local_p.x,
 		y: local_p.y,
-		width: local_scene.scale.x * p.width,
-		height: local_scene.scale.y * p.height,
+		// width: local_scene.scale.x * p.width,
+		// height: local_scene.scale.y * p.height,
+		width: p.width,
+		height: p.height,
 		angle: local_scene.angle360,
+		scaleX: local_scene.scale.x,
+		scaleY: local_scene.scale.y,
 		tag: {
 			global: p
 		}

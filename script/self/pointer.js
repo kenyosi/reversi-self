@@ -11,7 +11,6 @@ var timeout_delta_frame        = 3   * g.game.fps;
 var drpf                       = 7; // delta radius per frame for creating animation in que
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
-// var local_scene                 = require('./local_scene');
 var player                     = require('./player');
 var wm                         = require('./window_manager');
 var process                    = require('./process');
