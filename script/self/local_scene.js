@@ -46,29 +46,23 @@ player.prototype.set_local_scene = function () {
 	// this.angle = rotate_angle;
 	var cos_r  = Math.cos(this.angle);
 	var sin_r  = Math.sin(this.angle);
-	// var zc = [
-	// 	this.local_zero.x + this.local_center.x,
-	// 	this.local_zero.y + this.local_center.y
-	// ];
-	// var xc = [
-	// 	this.global_zero.x + this.global_center.x,
-	// 	this.global_zero.y + this.global_center.y
-	// ];
+	var lc = [
+		this.local_zero.x + this.local_center.x,
+		this.local_zero.y + this.local_center.y
+	];
+	var gc = [
+		this.global_zero.x + this.global_center.x,
+		this.global_zero.y + this.global_center.y
+	];
 	this.rotate = {
 		forward: {
 			matrix: [
 				[cos_r * this.scale.x, -sin_r * this.scale.y],
 				[sin_r * this.scale.x,  cos_r * this.scale.y],
-				// [cos_r, -sin_r],
-				// [sin_r,  cos_r],
 			],
 			vector: [
-				// -( cos_r * zc[0] - sin_r * zc[1]) + this.local_center.x,
-				// -( sin_r * zc[0] + cos_r * zc[1]) + this.local_center.y,
-				-(cos_r * this.scale.x * this.global_center.x - sin_r * this.scale.y * this.global_center.y) + this.local_center.x ,
-				-(sin_r * this.scale.x * this.global_center.x + cos_r * this.scale.y * this.global_center.y) + this.local_center.y,
-				// this.scale.x *(-( cos_r * zc[0] - sin_r * zc[1]) + this.local_center.x),
-				// this.scale.y *(-( sin_r * zc[0] + cos_r * zc[1]) + this.local_center.y)
+				-(cos_r * this.scale.x * gc[0] - sin_r * this.scale.y * gc[1]) + lc[0],
+				-(sin_r * this.scale.x * gc[0] + cos_r * this.scale.y * gc[1]) + lc[1],
 			],
 		},
 		inverse: {
@@ -77,8 +71,8 @@ player.prototype.set_local_scene = function () {
 				[-this.inv_scale.y * sin_r, this.inv_scale.y * cos_r]
 			],
 			vector: [
-				this.inv_scale.x * (-( cos_r * this.local_center.x + sin_r * this.local_center.y)) + this.global_center.x,
-				this.inv_scale.y * (-(-sin_r * this.local_center.x + cos_r * this.local_center.y)) + this.global_center.y
+				this.inv_scale.x * (-( cos_r * lc[0] + sin_r * lc[1])) + gc[0],
+				this.inv_scale.y * (-(-sin_r * lc[0] + cos_r * lc[1])) + gc[1],
 			],
 		},
 	};
@@ -110,19 +104,6 @@ player.prototype.rect_forward_init = function (rect) {
 	return p;
 };
 
-player.prototype.rect_inverse_init = function (rect) {
-	var w = this.calc_rect_part(rect); // this is not optimzed one
-	var p = apb(rect, w);
-	p = a_mult_xy_p_v(this.rotate.inverse, p);
-	p.width = rect.width;
-	p.height = rect.height;
-	p.scaleX = 1; //comes from this.inv_scale.x;
-	p.scaleY = 1; //comes from this.inv_scale.y;
-	p.angle  = 0; // comes from this.angle360
-	p.angle360 = 0; //this.angle360;
-	return p;
-};
-
 player.prototype.rect_forward = function (ev, rect) {
 	var w = this.calc_rect_part(rect);
 	var p = a_mult_xy_p_v(this.rotate.forward, ev.point); //x, y
@@ -151,8 +132,6 @@ player.prototype.rect_forward_down = function (ev, rect) {
 
 player.prototype.forward = function (ev) {
 	var point = a_mult_xy_p_v(this.rotate.forward, ev.point);
-	// point.x *=  this.scale.x;
-	// point.y *=  this.scale.y;
 	return {
 		point: point,
 		startDelta: a_mult_xy(this.rotate.forward, ev.startDelta),
@@ -163,8 +142,6 @@ player.prototype.forward = function (ev) {
 };
 player.prototype.forward_down = function (ev) {
 	var point = a_mult_xy_p_v(this.rotate.forward, ev.point);
-	// point.x *=  this.scale.x;
-	// point.y *=  this.scale.y;
 	return {
 		// point: a_mult_xy_p_v(this.rotate.forward, ev.point),
 		point: point,
@@ -186,6 +163,44 @@ player.prototype.inverse = function (ev) {
 player.prototype.inverse_down = function (ev) {
 	return {
 		point: a_mult_xy_p_v(this.rotate.inverse, ev.point),
+		startDelta: {x: 0, y: 0},
+		prevDelta: {x: 0, y: 0},
+		player: {id: ev.player.id,},
+		pointerId: ev.pointerId,
+	};
+};
+player.prototype.rect_inverse_init = function (rect) {
+	var w = this.calc_rect_part(rect); // this is not optimzed one
+	var p = apb(rect, w);
+	p = a_mult_xy_p_v(this.rotate.inverse, p);
+	p.width = rect.width;
+	p.height = rect.height;
+	p.scaleX = 1;   // comes from this.inv_scale.x;
+	p.scaleY = 1;   // comes from this.inv_scale.y;
+	p.angle  = 0;   // comes from this.angle360
+	p.angle360 = 0; // comes from this.angle360;
+	return p;
+};
+
+player.prototype.rect_inverse = function (ev, rect) {
+	var w = this.calc_rect_part(rect); // this is not optimzed one
+	var p = apb(rect, w);
+	p = a_mult_xy_p_v(this.rotate.inverse, p);
+	return {
+		point: p,
+		startDelta: a_mult_xy(this.rotate.inverse, ev.startDelta),
+		prevDelta: a_mult_xy(this.rotate.inverse, ev.prevDelta),
+		player: {id: ev.player.id,},
+		pointerId: ev.pointerId,
+	};
+};
+
+player.prototype.rect_inverse_down = function (ev, rect) {
+	var w = this.calc_rect_part(rect); // this is not optimzed one
+	var p = apb(rect, w);
+	p = a_mult_xy_p_v(this.rotate.inverse, p);
+	return {
+		point: p,
 		startDelta: {x: 0, y: 0},
 		prevDelta: {x: 0, y: 0},
 		player: {id: ev.player.id,},

@@ -64,82 +64,206 @@ var objects = function(details, f) {
 	this.p = scene.children[scene.children.length - 1];
 };
 
-objects.prototype.set_piece = function (e1, by_hand, re_draw) {
+// objects.prototype.set_piece = function (e1, by_hand, re_draw) {
+// 	by_hand = (by_hand === undefined ? true : by_hand);
+// 	re_draw = (re_draw === undefined ? true : re_draw);
+// 	if (!wm.eInE(e1, this.p, this.flag)) return 0;
+// 	var dil = this.group_id.length;
+// 	if (dil >= this.max_pieces) return -1;
+// 	var max_y = this.area.y + this.area.height - 32 / 2 - 6; //<----
+// 	e1.y = (e1.y <= max_y ? e1.y : max_y);
+// 	var ii = 0;
+// 	while (ii < dil) {
+// 		var dii = pi.group_id.indexOf(this.group_id[ii].id);
+// 		var dij = pi.index[dii];
+// 		this.group_id[ii].x = scene.children[dij].x;
+// 		this.group_id[ii].y = scene.children[dij].y;
+// 		if (re_draw) this.group_id[ii].p = scene.children[dij];
+// 		++ii;
+// 	}
+// 	this.min_dy = (wm.view.zooming ? 3 : 6);//<----
+// 	e1.x = this.p.x;
+// 	this.group_id.push({id: e1.id, x: e1.x, y: e1.y, p: e1});
+// 	this.group_id.sort(function(a, b) {return (a.y > b.y ? -1 : 1);});
+// 	var dy = [];
+// 	var y0 = this.group_id[0].y;
+// 	ii = 1;
+// 	var dl = this.group_id.length;
+// 	var ds = 0;
+// 	while(ii < dl) {
+// 		var y1 = this.group_id[ii].y;
+// 		var ya = y0 - y1;// - ds;
+// 		var yb = (ya >= this.min_dy ? ya : this.min_dy);
+// 		dy.push(yb);
+// 		ds = yb - ya;
+// 		this.group_id[ii].y -= ds;
+// 		y0 = this.group_id[ii].y;
+// 		++ii;
+// 	}
+// 	ii = dl - 1;
+// 	ds = (this.group_id[ii].y > this.area.y ? this.group_id[ii].y : this.area.y) - this.group_id[ii].y;
+// 	this.group_id[ii].y += ds;
+// 	this.group_id[ii].p.y = this.group_id[ii].y;
+// 	if (re_draw) this.group_id[ii].p.modified(); // this is required
+// 	while(ii > 0) {
+// 		var iim1 = ii - 1;
+// 		ya = dy[iim1] - ds;
+// 		dy[iim1] = (ya >= this.min_dy ? ya : this.min_dy);
+// 		ds = dy[iim1] - ya;
+// 		this.group_id[iim1].y   = this.group_id[ii].y + dy[iim1];
+// 		this.group_id[iim1].p.y = this.group_id[iim1].y;
+// 		if (re_draw) this.group_id[iim1].p.modified();
+// 		--ii;
+// 	}
+// 	var co_piece_bw = co.piece.bw[e1.tag.bw];
+// 	if (by_hand) {
+// 		var length_this_group_id =  this.group_id.length;
+// 		for (var i = 0; i < length_this_group_id; i++) {
+// 			var p = this.group_id[i];
+// 			pi.to_top(p.id, scene.children);
+// 		}
+// 		wm.draw_modified(e1.children[1], co_piece_bw.transit_in_pile[0]);
+// 		scene.setTimeout(function () {
+// 			wm.draw_modified(e1.children[1], co_piece_bw.in_pile);
+// 		},  co_piece_bw.transit_time);
+// 	}
+// 	else {
+// 		wm.draw_modified(e1.children[1], co_piece_bw.in_pile);
+// 	}
+// 	return 1;
+	
+// };
+
+objects.prototype.set_piece = function (e0, by_hand, re_draw) {
 	by_hand = (by_hand === undefined ? true : by_hand);
 	re_draw = (re_draw === undefined ? true : re_draw);
-	if (!wm.eInE(e1, this.p, this.flag)) return 0;
+	// if (!wm.eInE(e0, this.p, this.flag)) return 0;
+	if (!wm.eInEGlobal(e0, this.p, this.flag)) return 0;
+	// console.log('here');
+	var area = this.area.tag.global;
+	var e1 = e0.tag.global;
+	// console.log(this);
 	var dil = this.group_id.length;
 	if (dil >= this.max_pieces) return -1;
-	var max_y = this.area.y + this.area.height - 32 / 2 - 6; //<----
+	// var max_y = this.area.y + this.area.height - 32 / 2 - 6; //<----
+	var max_y = area.y + area.height - 32 / 2 - 6; //<----
 	e1.y = (e1.y <= max_y ? e1.y : max_y);
 	var ii = 0;
 	while (ii < dil) {
 		var dii = pi.group_id.indexOf(this.group_id[ii].id);
+		if (dii < 0) break;
 		var dij = pi.index[dii];
-		this.group_id[ii].x = scene.children[dij].x;
-		this.group_id[ii].y = scene.children[dij].y;
+		// this.group_id[ii].x = scene.children[dij].x;
+		// this.group_id[ii].y = scene.children[dij].y;
+		// console.log(scene.children[dij]);
+		this.group_id[ii].x = scene.children[dij].tag.global.x;
+		this.group_id[ii].y = scene.children[dij].tag.global.y;
 		if (re_draw) this.group_id[ii].p = scene.children[dij];
 		++ii;
 	}
 	this.min_dy = (wm.view.zooming ? 3 : 6);//<----
-	e1.x = this.p.x;
-	this.group_id.push({id: e1.id, x: e1.x, y: e1.y, p: e1});
+
+	// e1.x = this.p.x;
+	e1.x = this.p.tag.global.x;
+	// this.group_id.push({id: e1.id, x: e1.x, y: e1.y, p: e1});
+	this.group_id.push({id: e0.id, x: e1.x, y: e1.y, p: e0});
 	this.group_id.sort(function(a, b) {return (a.y > b.y ? -1 : 1);});
 	var dy = [];
 	var y0 = this.group_id[0].y;
+	// var y0 = this.group_id[0].tag.global.y;
 	ii = 1;
 	var dl = this.group_id.length;
 	var ds = 0;
 	while(ii < dl) {
 		var y1 = this.group_id[ii].y;
+		// var y1 = this.group_id[ii].tag.global.y;
 		var ya = y0 - y1;// - ds;
 		var yb = (ya >= this.min_dy ? ya : this.min_dy);
 		dy.push(yb);
 		ds = yb - ya;
 		this.group_id[ii].y -= ds;
+		// this.group_id[ii].tag.global.y -= ds;
 		y0 = this.group_id[ii].y;
+		// y0 = this.group_id[ii].tag.global.y;
 		++ii;
 	}
 	ii = dl - 1;
-	ds = (this.group_id[ii].y > this.area.y ? this.group_id[ii].y : this.area.y) - this.group_id[ii].y;
+	// ds = (this.group_id[ii].y > this.area.y ? this.group_id[ii].y : this.area.y) - this.group_id[ii].y;
+	// ds = (this.group_id[ii].tag.global.y > area.y ? this.group_id[ii].tag.global.y : area.y) - this.group_id[ii].tag.global.y;
+	ds = (this.group_id[ii].y > area.y ? this.group_id[ii].y : area.y) - this.group_id[ii].y;
 	this.group_id[ii].y += ds;
-	this.group_id[ii].p.y = this.group_id[ii].y;
-	if (re_draw) this.group_id[ii].p.modified(); // this is required
+	// this.group_id[ii].tag.global.y += ds;
+
+	// this.group_id[ii].p.y = this.group_id[ii].y;
+	// this.group_id[ii].p.tag.global.y = this.group_id[ii].tag.global.y;
+	this.group_id[ii].p.tag.global.y = this.group_id[ii].y;
+
+	//after update local xy from updated global xy
+	if (re_draw) {
+		// this.group_id[ii].p.modified(); 
+		update_local_piece(this.group_id[ii].p); // this is required
+	}
 	while(ii > 0) {
 		var iim1 = ii - 1;
 		ya = dy[iim1] - ds;
 		dy[iim1] = (ya >= this.min_dy ? ya : this.min_dy);
 		ds = dy[iim1] - ya;
 		this.group_id[iim1].y   = this.group_id[ii].y + dy[iim1];
-		this.group_id[iim1].p.y = this.group_id[iim1].y;
-		if (re_draw) this.group_id[iim1].p.modified();
+		// this.group_id[iim1].tag.global.y   = this.group_id[ii].tag.global.y + dy[iim1];
+
+		// this.group_id[iim1].p.y = this.group_id[iim1].y;
+		// this.group_id[iim1].p.tag.global.y = this.group_id[iim1].tag.global.y;
+		this.group_id[iim1].p.tag.global.y = this.group_id[iim1].y;
+
+		//after update local xy from updated global xy
+		if (re_draw) {
+			update_local_piece(this.group_id[iim1].p);
+		}
 		--ii;
 	}
-	var co_piece_bw = co.piece.bw[e1.tag.bw];
+	// var co_piece_bw = co.piece.bw[e1.tag.bw];
+	var co_piece_bw = co.piece.bw[e0.tag.bw];
 	if (by_hand) {
 		var length_this_group_id =  this.group_id.length;
 		for (var i = 0; i < length_this_group_id; i++) {
 			var p = this.group_id[i];
 			pi.to_top(p.id, scene.children);
 		}
-		wm.draw_modified(e1.children[1], co_piece_bw.transit_in_pile[0]);
+		// wm.draw_modified(e1.children[1], co_piece_bw.transit_in_pile[0]);
+		wm.draw_modified(e0.children[1], co_piece_bw.transit_in_pile[0]);
 		scene.setTimeout(function () {
-			wm.draw_modified(e1.children[1], co_piece_bw.in_pile);
+			// wm.draw_modified(e1.children[1], co_piece_bw.in_pile);
+			wm.draw_modified(e0.children[1], co_piece_bw.in_pile);
 		},  co_piece_bw.transit_time);
 	}
 	else {
-		wm.draw_modified(e1.children[1], co_piece_bw.in_pile);
+		// wm.draw_modified(e1.children[1], co_piece_bw.in_pile);
+		wm.draw_modified(e0.children[1], co_piece_bw.in_pile);
 	}
 	return 1;
 	
 };
 
-objects.prototype.get_piece = function (e0) { // status is for future reference
-	// if (!wm.eInE(e0, this.p)) return; //
-	// var this_group_id_index = this.group_id.findIndex((item, index, a) => (item.id == e0.id))
-	var this_group_id_index = find_index_of_id(e0, this.group_id);
-	if (this_group_id_index < 0) return;
+function update_local_piece(piece) {
+	var g = piece.tag.global;
+	//<----------------------
+	//<----------------------
+	//<----------------------
+	//<----------------------
+	var l = wm.local_scene_player[-1].rect_forward_init(g);
+	//<----------------------
+	//<----------------------
+	//<----------------------
+	piece.x = l.x;
+	piece.y = l.y;
+	piece.modified();
+}
 
+objects.prototype.get_piece = function (e0) { // status is for future reference
+	// console.log(this.group_id);
+	var this_group_id_index = find_index_of_id(e0, this.group_id);
+	// console.log(this_group_id_index);
+	if (this_group_id_index < 0) return;
 	this.group_id.splice(this_group_id_index, 1);
 	var co_piece_bw = co.piece.bw[e0.tag.bw];
 	wm.draw_modified(e0.children[1], co_piece_bw.transit_in_pile[0]);

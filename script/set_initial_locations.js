@@ -41,9 +41,10 @@ function pieces (scene) {
 	while(ii < conf.piece.n) {
 		var pp = scene.children[piece.index[ii]];
 		var pv = initial_object_locations[ii];
-		pp.x   = pv.x;
-		pp.y   = pv.y;
-		pp.tag = pv.tag;
+		var p2 = wm.local_scene_player[-1].rect_forward_init(pv);
+		pp.x   = p2.x;
+		pp.y   = p2.y;
+		pp.tag.global = {x: pv.x, y: pv.y, width: pv.width, height: pv.height};
 		wm.draw_modified(pp.children[0], conf.piece.unselect.background);
 		//Fill pieces in pile areas
 		var dp = indTo2D(ii, [conf.pile_area.max_pieces]);

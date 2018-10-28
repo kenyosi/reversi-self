@@ -225,6 +225,21 @@ function eInE (e0, e1, f) {
 }
 module.exports.eInE = eInE;
 
+function eInEGlobal (e0L, e1L, f) {
+	f = (f === undefined ? [0, 0, 0, 0] : f);
+	var zf = (view.zooming ? 0.5 : 1);
+	var e0 = e0L.tag.global;
+	var e1 = e1L.tag.global;
+	var x0 = e0.x + e0.width  * (1 + f[0]) / 2.0 * zf;
+	var x1 = e0.x + e0.width  * (1 - f[1]) / 2.0 * zf;
+	var y0 = e0.y + e0.height * (1 + f[2]) / 2.0 * zf;
+	var y1 = e0.y + e0.height * (1 - f[3]) / 2.0 * zf;
+	return (x0 >= e1.x && x1 <= e1.x + e1.width * zf) && (y0 >= e1.y && y1 <= e1.y + e1.height * zf);
+}
+module.exports.eInEGlobal = eInEGlobal;
+
+
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 function show_objects(index) {
 	var l = player_objects[index].length;

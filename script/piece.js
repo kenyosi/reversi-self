@@ -78,8 +78,6 @@ function create(details) {
 		// scaleY: 1.0,
 		x: local_p.x,
 		y: local_p.y,
-		// x: local_p.x - (1.0 - local_scene.scale.x) * details.width / 2.0,
-		// y: local_p.y - (1.0 - local_scene.scale.y) * details.height / 2.0,
 		width: details.width,
 		height: details.height,
 		angle: local_scene.angle360,
@@ -127,9 +125,11 @@ function create(details) {
 						// up(ii, ev, group);
 						var ev = group.tag.last[ii].ev;
 						if (ev === undefined) break;
+						//ここでエラーが出るev.x がない？
 						var message = create_message(ev, group);
 						var index = message.index;
-						var ev_sync = wm.local_scene_player[index.player].inverse(ev);
+						// var ev_sync = wm.local_scene_player[index.player].inverse(ev);
+						var ev_sync = wm.local_scene_player[index.player].rect_inverse(ev, group);
 						up(ii, ev_sync, group); //not fire other_local
 						// fire_other_local('piece_other_local_up', index, ev_sync);
 					}
@@ -148,9 +148,6 @@ function create(details) {
 	}
 	function create_message(ev, group) {
 		var player_index = player.find_index(ev.player.id);
-		var xy = get_absolute_position(ev);
-		ev.point.x = xy.x;
-		ev.point.y = xy.y;
 		return {
 			index: {
 				player: player_index,
@@ -164,8 +161,11 @@ function create(details) {
 		if (message === false) return;
 		var index = message.index;
 		if (!wm.player_operations[index.player].wait()) return;
-
-		var ev_sync = wm.local_scene_player[index.player].inverse_down(ev);
+		// var ev_sync = wm.local_scene_player[index.player].inverse_down(ev);
+		var xy = get_absolute_position(ev);
+		ev.point.x = xy.x;
+		ev.point.y = xy.y;
+		var ev_sync = wm.local_scene_player[index.player].rect_inverse_down(ev, group);
 		status[group.id].pointdown.in_board[index.player] = get_address_in_board(group).validate;
 		status[group.id].pointdown.boundary[index.player].set_start(group);
 		// down(index.player, ev, group);
@@ -173,25 +173,35 @@ function create(details) {
 
 	});
 	group.pointMove.add(function (ev) {
+		// console.log(group); // この後でmove 中でlocal座標がglobalになる
 		var message = down_move_point_event(ev, group);
 		if (message === false) return;
 		var index = message.index;
-
 		//resume process
 		if (!status[group.id].pointdown.processed[index.player].status()) { 
 			if (!wm.player_operations[index.player].wait()) return;
 			// down(index.player, ev, group);
-			var ev_sync = wm.local_scene_player[index.player].inverse_down(ev);
+			// var ev_sync = wm.local_scene_player[index.player].inverse_down(ev);
+			var xy = get_absolute_position(ev);
+			ev.point.x = xy.x;
+			ev.point.y = xy.y;
+			var ev_sync = wm.local_scene_player[index.player].rect_inverse_down(ev, group);
 			fire_other_local('piece_other_local_down', index, ev_sync);
 			return;
 		}
 		if (!status[group.id].pointdown.processed[index.player].status()) return;
 		if (!status[group.id].events.process.status()) return;
 		// move(index.player, ev, group);
-		ev_sync = wm.local_scene_player[index.player].inverse(ev);
+		// ev_sync = wm.local_scene_player[index.player].inverse(ev);
+		xy = get_absolute_position(ev);
+		ev.point.x = xy.x;
+		ev.point.y = xy.y;
+		ev_sync = wm.local_scene_player[index.player].rect_inverse(ev, group);
 		fire_other_local('piece_other_local_move', index, ev_sync);
 	});
 	group.pointUp.add(function (ev) {
+		// console.log(group); // この後でmove 中でlocal座標がglobalになる
+
 		if (!player.validate(ev.player, 0)) return;
 		if ((wm.admin.control && player.get_group(ev.player.id) != 'admin')) return;
 		if (!wm.semaphoe.status()) return;
@@ -201,7 +211,11 @@ function create(details) {
 		// up(ev, group, player_index);
 		var message = create_message(ev, group);
 		var index = message.index;
-		var ev_sync = wm.local_scene_player[index.player].inverse(ev);
+		// var ev_sync = wm.local_scene_player[index.player].inverse(ev);
+		var xy = get_absolute_position(ev);
+		ev.point.x = xy.x;
+		ev.point.y = xy.y;
+		var ev_sync = wm.local_scene_player[index.player].rect_inverse(ev, group);
 		fire_other_local('piece_other_local_up', index, ev_sync);
 	});
 	scene.append(group);
@@ -257,7 +271,8 @@ function set_initial_pressed(player_index, group) {
 	camera_position_pointDown = wm.view.position;
 	var pi = 0;
 	while(pi < pile_areas_length) {
-		pile_areas[pi].get_piece(group, status[group.id]);
+		// pile_areas[pi].get_piece(group, status[group.id]);
+		pile_areas[pi].get_piece(group);
 		++pi;
 	}
 	status[group.id].pointdown.processed[player_index].signal();
@@ -283,34 +298,40 @@ function fire_other_local(function_name, index, ev) {
 function other_local_down(message) {
 	// pointer_other_local_down as destination in message event in message_eventmanager.js
 	var index = message.data.index;
-	var ev = wm.local_scene_player[index.player].forward_down(message.data.ev);
+	var target_piece = status[index.piece].p_piece;
+	// var ev = wm.local_scene_player[index.player].forward_down(message.data.ev);
+	// var ev = wm.local_scene_player[index.player].rect_forward_down(message.data.ev, target_piece);
 	//<--- development
 	// if (index.player === player.find_index(ev.player.id)) return;
-	down(index.player, ev, status[index.piece].p_piece);
+	// down(index.player, ev, target_piece);
+	down_local(index.player, message.data.ev, target_piece);
 }
 module.exports.other_local_down = other_local_down;
 
 function other_local_move(message) {
 	// pointer_other_local_down as destination in message event in message_eventmanager.js
 	var index = message.data.index;
-	var ev = wm.local_scene_player[index.player].forward(message.data.ev);
+	var target_piece = status[index.piece].p_piece;
+	// var ev = wm.local_scene_player[index.player].forward(message.data.ev);
+	// var ev = wm.local_scene_player[index.player].rect_forward(message.data.ev, target_piece);
 	//<--- development
 	// if (index.player === player.find_index(ev.player.id)) return;
-	move(index.player, ev, status[index.piece].p_piece);
+	// move(index.player, ev, target_piece);
+	move_local(index.player, message.data.ev, target_piece);
 }
 module.exports.other_local_move = other_local_move;
 
 function other_local_up(message) {
 	// pointer_other_local_down as destination in message event in message_eventmanager.js
 	var index = message.data.index;
-	var ev = wm.local_scene_player[index.player].forward(message.data.ev);
+	var target_piece = status[index.piece].p_piece;
+	// var ev = wm.local_scene_player[index.player].forward(message.data.ev);
+	var ev = wm.local_scene_player[index.player].rect_forward(message.data.ev, target_piece);
 	//<--- development
 	// if (index.player === player.find_index(ev.player.id)) return;
-	up(index.player, ev, status[index.piece].p_piece);
-	// up(ev, group, player_index);
+	up(index.player, ev, target_piece);
 }
 module.exports.other_local_up = other_local_up;
-
 
 function reverse(group) {
 	group.tag.bw = (group.tag.bw + 1) % 2;
@@ -334,12 +355,49 @@ function reverse(group) {
 	// commenting.post(message_here);
 }
 
-function down(player_index, ev, group) {
-	set_last_status(1, player_index, ev, group);// required
-	set_initial_pressed(player_index, group);
+// function down(player_index, ev, group) {
+// 	set_last_status(1, player_index, ev, group);// required
+// 	set_initial_pressed(player_index, group);
+// }
+function down_local(player_index, ev_g, target_piece) {
+	var ev_l = wm.local_scene_player[player_index].rect_forward_down(ev_g, target_piece);
+	set_last_status(1, player_index, ev_l, target_piece);// required
+	set_initial_pressed(player_index, target_piece);
+	// console.log(target_piece);
+
 }
-function move(player_index, ev, group) {
-	set_last_status(0, player_index, ev, group);
+// function move(player_index, ev, group) {
+// 	set_last_status(0, player_index, ev, group);
+// 	// Force up piece if it's rapid movement. Check if this is required carefully.
+// 	// var dxy = ev.prevDelta.x * ev.prevDelta.x + ev.prevDelta.y * ev.prevDelta.y
+// 	// if (dxy > conf.window.max_prevDelta || true) {
+// 	// up(player_index, ev, group);
+// 	// return
+// 	// }
+// 	if (!wm.view.floating) {
+// 		var xy = {x: 0, y: 0};
+// 		var ii = 0;
+// 		while (ii < conf.players.max_players) {
+// 			if (status[group.id].pointdown.processed[ii].status()) {
+// 				var pxy = {x: 0, y: 0};
+// 				pxy = status[group.id].pointdown.boundary[ii].force(group.tag.last[ii].ev, pxy);
+// 				xy.x += pxy.x;
+// 				xy.y += pxy.y;
+// 			}
+// 			ii++;
+// 		}
+// 		group.x = xy.x / group.tag.pointer_pressed;
+// 		group.y = xy.y / group.tag.pointer_pressed;
+// 	}
+// 	else {
+// 		group.x -= ev.prevDelta.x;
+// 		group.y -= ev.prevDelta.y;
+// 	}
+// 	group.modified();
+// }
+function move_local(player_index, ev_g, group) {
+	var ev_l = wm.local_scene_player[player_index].rect_forward(ev_g, group);
+	set_last_status(0, player_index, ev_l, group);
 	// Force up piece if it's rapid movement. Check if this is required carefully.
 	// var dxy = ev.prevDelta.x * ev.prevDelta.x + ev.prevDelta.y * ev.prevDelta.y
 	// if (dxy > conf.window.max_prevDelta || true) {
@@ -347,26 +405,45 @@ function move(player_index, ev, group) {
 	// return
 	// }
 	if (!wm.view.floating) {
-		var xy = {x: 0, y: 0};
+		var xy = {x: 0, y: 0, width: group.width, height: group.height};
 		var ii = 0;
 		while (ii < conf.players.max_players) {
 			if (status[group.id].pointdown.processed[ii].status()) {
-				var pxy = {x: 0, y: 0};
+				var pxy = {x: 0, y: 0, width: group.width, height: group.height};
+				// console.log(group.tag.last[ii].ev);
 				pxy = status[group.id].pointdown.boundary[ii].force(group.tag.last[ii].ev, pxy);
+				// pxy.width = group.width;
+				// pxy.height = group.height;
+				pxy = wm.local_scene_player[ii].rect_inverse_init(pxy);
 				xy.x += pxy.x;
 				xy.y += pxy.y;
 			}
 			ii++;
 		}
-		group.x = xy.x / group.tag.pointer_pressed;
-		group.y = xy.y / group.tag.pointer_pressed;
+		// xy = {x: xy.x / group.tag.pointer_pressed, y: xy.y / group.tag.pointer_pressed}
+		xy.x = xy.x / group.tag.pointer_pressed;
+		xy.y = xy.y / group.tag.pointer_pressed;
+		// group.tag.global.x = xy.x / group.tag.pointer_pressed;
+		// group.tag.global.y = xy.y / group.tag.pointer_pressed;
+		group.tag.global.x = xy.x;
+		group.tag.global.y = xy.y;
+		var xy_l = wm.local_scene_player[player_index].rect_forward_init(xy);
+		// console.log(xy);
+		// console.log(xy_l);
+		// group.x = xy_l.x / group.tag.pointer_pressed;
+		// group.y = xy_l.y / group.tag.pointer_pressed;
+		group.x = xy_l.x;
+		group.y = xy_l.y;
 	}
 	else {
-		group.x -= ev.prevDelta.x;
-		group.y -= ev.prevDelta.y;
+		group.tag.global.x -= ev_g.prevDelta.x;
+		group.tag.global.y -= ev_g.prevDelta.y;
+		group.x            -= ev_l.prevDelta.x;
+		group.y            -= ev_l.prevDelta.y;
 	}
 	group.modified();
 }
+
 function up(player_index, ev, group) {
 	if (!status[group.id].pointdown.processed[player_index].wait()) return;
 	if (!wm.player_operations[player_index].signal()) return;
@@ -386,6 +463,7 @@ function up(player_index, ev, group) {
 		reverse(group);
 		return;
 	}
+	// console.log(group);
 	if (xy.validate) {
 		if (!status[group.id].pointdown.in_board[player_index]){
 			if (ev.pointerId === pointer.initial_pointer_id[player_index]) {
@@ -442,26 +520,36 @@ module.exports.get_address_in_board = get_address_in_board;
 function set_piles(d) {
 	var re = -1;
 	var zf = (wm.view.zooming ? 0.5 : 1);
+	// console.log(d);
+	// console.log(pile_areas[0].area);
+	// var ops = [
+	// 	[1, 0, - (d.width - 1) * zf],
+	// 	// [0, 1, + (d.width + 1) * zf],
+	// 	[0, 1, - 2*(d.width + 1) * zf],
+	// 	[3, 2, - (d.width - 1) * zf],
+	// 	// [2, 3, + (d.width + 1) * zf],
+	// 	[2, 3, - 2*(d.width + 1) * zf],
+	// ];
 	var ops = [
-		[1, 0, - (d.width - 1) * zf],
-		// [0, 1, + (d.width + 1) * zf],
-		[0, 1, - 2*(d.width + 1) * zf],
-		[3, 2, - (d.width - 1) * zf],
-		// [2, 3, + (d.width + 1) * zf],
-		[2, 3, - 2*(d.width + 1) * zf],
+		[1, 0, - (d.tag.global.width - 1) * zf],
+		// [0, 1, + (d.tag.global.width + 1) * zf],
+		[0, 1, - 2*(d.tag.global.width + 1) * zf],
+		[3, 2, - (d.tag.global.width - 1) * zf],
+		// [2, 3, + (d.tag.global.width + 1) * zf],
+		[2, 3, - 2*(d.tag.global.width + 1) * zf],
 	];
 	while (re == -1){
 		var pi = 0;
 		while(pi < pile_areas_length) {
 			re = pile_areas[pi].set_piece(d);
-			if (re == 1) {
-				return;
-			}
+			if (re == 1) return;
 			else if (re == -1) {
-				d.x = pile_areas[ops[pi][0]].area.x;
+				// d.x = pile_areas[ops[pi][0]].area.x;
+				d.tag.global.x = pile_areas[ops[pi][0]].area.tag.global.x;
 				re = pile_areas[ops[pi][0]].set_piece(d);
 				if (re == -1) {
-					d.x = pile_areas[ops[pi][1]].area.x + ops[pi][2];
+					// d.x = pile_areas[ops[pi][1]].area.x + ops[pi][2];
+					d.tag.global.x = pile_areas[ops[pi][1]].area.tag.global.x + ops[pi][2];
 				}
 				return;
 			}
