@@ -2,10 +2,8 @@
  * User local scene view
  * @self, Akashic content
  * 
- * 
  * forward operator: obtain a local position from a global position
  * inverse operator: obtain a global position from a local position
- * 
  */
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Configuration
@@ -43,7 +41,6 @@ player.prototype.set_angle = function (p) {
 	this.angle360 = two_pi_to_360 * p;
 };
 player.prototype.set_local_scene = function () {
-	// this.angle = rotate_angle;
 	var cos_r  = Math.cos(this.angle);
 	var sin_r  = Math.sin(this.angle);
 	var lc = [
@@ -54,25 +51,33 @@ player.prototype.set_local_scene = function () {
 		this.global_zero.x + this.global_center.x,
 		this.global_zero.y + this.global_center.y
 	];
+	var rfm = [
+		[cos_r * this.scale.x, -sin_r * this.scale.y],
+		[sin_r * this.scale.x,  cos_r * this.scale.y],
+	];
+	var rim = [
+		[ this.inv_scale.x * cos_r, this.inv_scale.x * sin_r],
+		[-this.inv_scale.y * sin_r, this.inv_scale.y * cos_r]
+	];
 	this.rotate = {
 		forward: {
 			matrix: [
-				[cos_r * this.scale.x, -sin_r * this.scale.y],
-				[sin_r * this.scale.x,  cos_r * this.scale.y],
+				[rfm[0][0], rfm[0][1]], // [cos_r * this.scale.x, -sin_r * this.scale.y],
+				[rfm[1][0], rfm[1][1]], // [sin_r * this.scale.x,  cos_r * this.scale.y],
 			],
 			vector: [
-				-(cos_r * this.scale.x * gc[0] - sin_r * this.scale.y * gc[1]) + lc[0],
-				-(sin_r * this.scale.x * gc[0] + cos_r * this.scale.y * gc[1]) + lc[1],
+				-(rfm[0][0] * gc[0] + rfm[0][1] * gc[1]) + lc[0], // -(cos_r * this.scale.x * gc[0] - sin_r * this.scale.y * gc[1]) + lc[0],
+				-(rfm[1][0] * gc[0] + rfm[1][1] * gc[1]) + lc[1], // -(sin_r * this.scale.x * gc[0] + cos_r * this.scale.y * gc[1]) + lc[1],
 			],
 		},
 		inverse: {
 			matrix: [
-				[ this.inv_scale.x * cos_r, this.inv_scale.x * sin_r],
-				[-this.inv_scale.y * sin_r, this.inv_scale.y * cos_r]
+				[rim[0][0], rim[0][1]], // [ this.inv_scale.x * cos_r, this.inv_scale.x * sin_r],
+				[rim[1][0], rim[1][1]], // [-this.inv_scale.y * sin_r, this.inv_scale.y * cos_r]
 			],
 			vector: [
-				this.inv_scale.x * (-( cos_r * lc[0] + sin_r * lc[1])) + gc[0],
-				this.inv_scale.y * (-(-sin_r * lc[0] + cos_r * lc[1])) + gc[1],
+				-(rim[0][0] * lc[0] + rim[0][1] * lc[1]) + gc[0], // this.inv_scale.x * (-( cos_r * lc[0] + sin_r * lc[1])) + gc[0],
+				-(rim[1][0] * lc[0] + rim[1][1] * lc[1]) + gc[1], // this.inv_scale.y * (-(-sin_r * lc[0] + cos_r * lc[1])) + gc[1],
 			],
 		},
 	};
