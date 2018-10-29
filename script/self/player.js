@@ -197,7 +197,7 @@ function logout(player_index) {
 		piece.status[gid].pointdown.processed[player_index].set_value(0);
 		ii++;
 	}
-	commenting.post('P' + wm.index_pp[ii] + 'は退席しました');
+	commenting.post('P' + wm.index_pp[player_index] + 'は退席しました');
 }
 module.exports.logout = logout;
 
