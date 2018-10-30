@@ -146,7 +146,7 @@ function create(details) {
 		if (!status[group.id].pointdown.processed[player_index].status()) return;
 		if (!status[group.id].events.process.status()) return;
 		set_last_status(0, player_index, ev, group);
-		// force place disk if rapid movement. Check if this is required carefully.
+		// force piece down, if rapid movement. Check if this is required carefully.
 		// var dxy = ev.prevDelta.x * ev.prevDelta.x + ev.prevDelta.y * ev.prevDelta.y
 		// if (dxy > conf.window.max_prevDelta || true) {
 		// place(ev, group);

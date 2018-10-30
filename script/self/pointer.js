@@ -160,22 +160,6 @@ var user = function(player_index, pointer_index, style) {
 	scene.append(this.pointer);
 
 	this.pointer.update.add(function() {
-		// if (pointer.tag.pointer_pressed) {
-		// 	if ((pointer.tag.last_timestamp + g.game.age) % g.game.fps == 0) {
-		// 		if(pointer.tag.last_timestamp + timeout_delta_frame < g.game.age) {
-		// 			var player_index = pointer.tag.player_index;
-		// 			update_by_operation('off', player_index, undefined);
-		// 			// var touch_index = pointer.tag.multi_touch_index;
-		// 			var pointer_index = pointer.tag.pointer_index;
-		// 			// var user = player_multi_touch[player_index][pointer_index];
-		// 			var user = player_pointer[player_index][pointer_index];
-		// 			// unpressed process
-		// 			user.pointer.tag.pointer_pressed = false;
-		// 			pointers_pressed[player_index].wait();
-		// 			if (pointer_index != initial_pointer_id[player_index]) user.pointer.hide();
-		// 		}
-		// 	}
-		// }
 		if (!pointer.tag.pointer_pressed) return;
 		if ((pointer.tag.last_timestamp + g.game.age) % g.game.fps != 0) return;
 		if (pointer.tag.last_timestamp + timeout_delta_frame >= g.game.age) return;
