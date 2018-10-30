@@ -146,7 +146,7 @@ function create(details) {
 		if (!status[group.id].pointdown.processed[player_index].status()) return;
 		if (!status[group.id].events.process.status()) return;
 		set_last_status(0, player_index, ev, group);
-		// force place disk if rapid movement. Check if this is required carefully.
+		// force piece down, if rapid movement. Check if this is required carefully.
 		// var dxy = ev.prevDelta.x * ev.prevDelta.x + ev.prevDelta.y * ev.prevDelta.y
 		// if (dxy > conf.window.max_prevDelta || true) {
 		// place(ev, group);
@@ -278,10 +278,12 @@ function place(ev, group, player_index) {
 			// commenting.post(message_here);
 		}
 	}
-	if (!status[group.id].events.process.wait()) return;
-	wm.draw_modified(group.children[0], conf.disk.unselect.background);
-	set_piles(group, status[group.id]);
-	status[group.id].events.process.signal();
+	else {
+		if (!status[group.id].events.process.wait()) return;
+		wm.draw_modified(group.children[0], conf.disk.unselect.background);
+		set_piles(group, status[group.id]);
+		status[group.id].events.process.signal();
+	}
 }
 function reverse(group) {
 	group.tag.bw = (group.tag.bw + 1) % 2;

@@ -21,7 +21,8 @@ var pointer                    = require('./pointer');
 var common_control             = require('./common_control');
 var admin_control              = require('./admin_control');
 var help                       = require('./help');
-// var commenting                 = require('./commenting');
+var commenting                 = require('./commenting');
+var message_event              = require('./message_event_manager');
 var statusbar                  = require('./statusbar');
 var confirm                    = require('./confirm');
 var set_inital_locations       = require('../set_initial_locations');
@@ -58,14 +59,16 @@ module.exports.semaphoe          = semaphoe;
 module.exports.player_operations = player_operations;
 
 function init() {
+	player.init();
 }
 module.exports.init = init;
 
 function set_scene(sc) {
 	scene = sc;
-	common_control.set_scene(sc);
+	message_event.set_scene(scene);
+	common_control.set_scene(scene);
 	confirm.set_scene(scene);
-	// commenting.set_scene(scene); 		// set destination of comment
+	commenting.set_scene(scene);
 	help.set_scene(scene, view);
 }
 module.exports.set_scene = set_scene;
@@ -199,7 +202,13 @@ function create() {
 		pointer.update_by_operation('on', player_index, undefined);
 		++player_index;
 	}
-	player_index = player.find_index(g.game.player.id);
+	// player_index = player.find_index(g.game.player.id);
+	// commenting.post('コマはタップすると反転します');
+	commenting.post('使い方は右下の[？]アイコンをタップ下さい');
+	if (player.caster_joined && !player.current[0].login) {
+		status_bottom.set_message('ごめんなさい、P1の環境で動作しません', -1);
+	}
+
 }
 module.exports.create = create;
 

@@ -235,7 +235,7 @@ var comment = {
 		cssColor: 'white',
 		opacity: 1.0,
 		strokeColor: 'black',
-		strokeWidth: 0.25
+		strokeWidth: 0.33
 	},
 };
 module.exports.comment = comment;

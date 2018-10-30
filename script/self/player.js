@@ -8,13 +8,22 @@ var conf                       = require('../content_config');
 var status_bar_messages = ['あなたはP1です'];
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Initialization
-// var commenting                 = require('./commenting');
-var wm                         = require('./window_manager');
+var commenting                 = require('./commenting');
 var pointer                    = require('./pointer');
+var wm                         = require('./window_manager');
 var piece                      = require('../piece');
-var current                    = [ // intend deep copy, and avoid reference copy
-	{id: '-9999', name: '', head: 'Player1: 参加中', timestamp: conf.const.old_unix_time, time_warning: 0, player_plate: 0, player_plate_status: 0, login: false, group: 'admin'},
-];
+var current                    = [// intend deep copy, and avoid reference copy
+	{
+		id: '-9999',
+		name: '',
+		head: 'P1: 参加中',
+		timestamp: conf.const.old_unix_time,
+		time_warning: 0,
+		player_plate: 0,
+		player_plate_status: 0,
+		login: false,
+		group: 'admin'
+	},];
 var validate_index = [
 	{st: 0, en: conf.players.max_players}, // player 1, player 2, and player 3
 	{st: 0, en: 1},                        // player 1 only
@@ -22,34 +31,28 @@ var validate_index = [
 	{st: 2, en: 3},                        // player 3 only
 ];
 
-var ii = 0;
-while (ii < conf.players.max_players) {
-	status_bar_messages[ii] = 'あなたはP' + ii + 'です';
-	ii++;
-}
-ii = 1;
+var ii = 1;
 while (ii < conf.players.max_players) {
 	var ip = (ii + 1).toString();
-	status_bar_messages[ii] = 'あなたはP' + ip + 'です';
+	status_bar_messages[ii] = 'あなたはP' + ip + 'です'; // defined and initialized zero before this
 	current [ii]            = {id: '-9999', name: '', head: 'Player' + ip + ': 募集します', timestamp: conf.const.old_unix_time, time_warning: 0, player_plate: 0, player_plate_status: 0, login: false, group: 'user'},
 	validate_index[ii + 1]  = {st: ii - 1, en: ii};
 	ii++;
 }
 
-var caster_joined              = false;
-
+var caster ={join_event: false};
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-module.exports.current         = current;
+module.exports.caster         = caster;
+module.exports.current        = current;
 
 function init() {
 	g.game.join.add(function (ev) {
 		var player_index = 0;
-		if (!caster_joined) {
-			if (ev.player === undefined) {
-				return;
-			}
+		if (!caster.join_event) {
+			caster.join_event = true;
+			if (ev.player === undefined) return;
+			if (ev.player.id === undefined) return;
 			current[player_index] = new_propoeties(ev.player, player_index, g.game.age);
-			caster_joined = true;
 		}
 	});
 }
@@ -57,16 +60,6 @@ module.exports.init = init;
 
 // function set_scene(sc) { scene = sc;}
 // module.exports.set_scene = set_scene;
-// function set_show_by_join(obj) { show_by_join = obj;}
-// module.exports.set_show_by_join = set_show_by_join;
-
-// Expensive part, should carefuley code this function, Ken Y.
-
-// function check_player_id(id) {
-// 	if (!id === undefined) return true;
-// 	wm.status_bottom.set_message('ごめんなさい、お使いの端末で動作しません', -2); // will create local message
-// 	return false;
-// }
 
 function validate_group(player, ci) {
 	if (player.id === undefined) return false;
@@ -110,7 +103,7 @@ function validate_group_join(player, ci) {
 		if (!f[ii]) { // joined a new player
 			current[ii] = new_propoeties(player, ii, current_time);
 			// commenting.post('Player' + wm.index_pp[ii] + 'は' + current[ii].name.substr(0, 2) + 'さんです');
-			// commenting.post('Player' + wm.index_pp[ii] + 'がきまりました');
+			commenting.post('P' + wm.index_pp[ii] + 'が着席しました');
 			pointer.update_by_operation('on', ii, undefined);
 			wm.update_common_style('on', conf.window_icon.login, wm.login_controls[ii]);
 			wm.status_bottom.set_message(status_bar_messages[ii], ii);
@@ -167,8 +160,7 @@ function validate_join(player, ci) {
 			pointer.update_by_operation('on', ii, undefined);
 			wm.update_common_style('on', conf.window_icon.login, wm.login_controls[ii]);
 			wm.status_bottom.set_message(status_bar_messages[ii], ii);
-			// commenting.post('Player' + wm.index_pp[ii] + 'は' + current[ii].name.substr(0, 2) + 'さんです');
-			// commenting.post('Player' + wm.index_pp[ii] + 'がきまりました');
+			commenting.post('P' + wm.index_pp[ii] + 'が着席しました');
 			return true;
 		}
 		ii++;
@@ -190,7 +182,7 @@ function find_index(id, ci) {
 }
 module.exports.find_index = find_index;
 
-function logout(player_index) {// mes is for posting comment (no use now)
+function logout(player_index) {
 	current[player_index] = conf.players.default[player_index];
 	pointer.set_name_background('off', player_index); // direct update is required, not called pointer.update_by_operation('off', undefined, player_index);
 	wm.update_common_style('off', conf.window_icon.login, wm.login_controls[player_index]);
@@ -205,7 +197,7 @@ function logout(player_index) {// mes is for posting comment (no use now)
 		piece.status[gid].pointdown.processed[player_index].set_value(0);
 		ii++;
 	}
-	// commenting.post(mes);
+	commenting.post('P' + wm.index_pp[player_index] + 'は退席しました');
 }
 module.exports.logout = logout;
 
