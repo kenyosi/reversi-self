@@ -82,7 +82,7 @@ module.exports.validate_group = validate_group;
 
 // Expensive part, should carefuley code this function, Ken Y.
 function validate_group_join(player, ci) {
-	if (player.id === undefined) return;
+	if (player.id === undefined) return false;
 	ci = (ci === undefined ? 0 : ci);
 	var current_time = g.game.age;
 	var f = [];
