@@ -38,9 +38,7 @@ function set_scene(sc) {
 		var user = player_pointer[index.player][index.pointer];
 		if(user.pointer.tag.pointer_pressed) return; // check if pointer is already pressed.
 		//<--- development
-		var ev_sync = wm.local_scene_player[index.player].inverse_down(ev);
-		// console.log(ev);
-		// console.log(ev_sync);
+		var ev_sync = wm.local_scene_player[index.player].point_inverse_down(ev);
 		// down(index, ev_sync);
 		fire_other_local('pointer_other_local_down', index, ev_sync);
 	});
@@ -53,13 +51,13 @@ function set_scene(sc) {
 			//<--- development
 			// down(index, user.pointer.tag.last_ev);
 			if (user.pointer.tag.last_ev === undefined) {
-				user.pointer.tag.last_ev = wm.local_scene_player[index.player].inverse_down(ev);
+				user.pointer.tag.last_ev = wm.local_scene_player[index.player].point_inverse_down(ev);
 			}
 			fire_other_local('pointer_other_local_down', index, user.pointer.tag.last_ev);
 			return;
 		}
 		//<--- development
-		var ev_sync = wm.local_scene_player[index.player].inverse(ev);
+		var ev_sync = wm.local_scene_player[index.player].point_inverse(ev);
 		// move(index, ev_sync);
 		fire_other_local('pointer_other_local_move', index, ev_sync);
 	});
@@ -73,7 +71,7 @@ function set_scene(sc) {
 		if(!user.pointer.tag.pointer_pressed) return; // check if pointer is already unpressed.
 		// unpressed process
 		//<--- development
-		// var ev_sync = wm.local_scene_player[index.player].inverse(ev);
+		// var ev_sync = wm.local_scene_player[index.player].point_inverse(ev);
 		// up(index);
 		fire_other_local('pointer_other_local_up', index);
 	});
@@ -319,7 +317,7 @@ function other_local_down(message) {
 	// pointer_other_local_down as destination in message event in message_eventmanager.js
 	var index = message.data.index;
 	// var ev = message.data.ev;
-	var ev = wm.local_scene_player[index.player].forward_down(message.data.ev);
+	var ev = wm.local_scene_player[index.player].point_forward_down(message.data.ev);
 	// console.log(ev);
 	//<--- development
 	// if (index.player === player.find_index(ev.player.id)) return;
@@ -330,7 +328,7 @@ function other_local_move(message) {
 	// pointer_other_local_down as destination in message event in message_eventmanager.js
 	var index = message.data.index;
 	// var ev = message.data.ev;
-	var ev = wm.local_scene_player[index.player].forward(message.data.ev);
+	var ev = wm.local_scene_player[index.player].point_forward(message.data.ev);
 	//<--- development
 	// if (index.player === player.find_index(ev.player.id)) return;
 	move(index, ev);
@@ -340,7 +338,7 @@ function other_local_up(message) {
 	// pointer_other_local_down as destination in message event in message_eventmanager.js
 	// var index = message.data.index;
 	// var ev = message.data.ev;
-	// var ev = wm.local_scene_player[index.player].forward_down(message.data.ev);
+	// var ev = wm.local_scene_player[index.player].point_forward_down(message.data.ev);
 	//<--- development
 	// if (index.player === player.find_index(ev.player.id)) return;
 	up(message.data.index);

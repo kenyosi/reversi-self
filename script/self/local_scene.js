@@ -135,7 +135,7 @@ player.prototype.rect_forward_down = function (ev, rect) {
 	};
 };
 
-player.prototype.forward = function (ev) {
+player.prototype.point_forward = function (ev) {
 	var point = a_mult_xy_p_v(this.rotate.forward, ev.point);
 	return {
 		point: point,
@@ -145,7 +145,7 @@ player.prototype.forward = function (ev) {
 		pointerId: ev.pointerId,
 	};
 };
-player.prototype.forward_down = function (ev) {
+player.prototype.point_forward_down = function (ev) {
 	var point = a_mult_xy_p_v(this.rotate.forward, ev.point);
 	return {
 		// point: a_mult_xy_p_v(this.rotate.forward, ev.point),
@@ -156,7 +156,7 @@ player.prototype.forward_down = function (ev) {
 		pointerId: ev.pointerId,
 	};
 };
-player.prototype.inverse = function (ev) {
+player.prototype.point_inverse = function (ev) {
 	return {
 		point: a_mult_xy_p_v(this.rotate.inverse, ev.point),
 		startDelta: a_mult_xy(this.rotate.inverse, ev.startDelta),
@@ -165,7 +165,7 @@ player.prototype.inverse = function (ev) {
 		pointerId: ev.pointerId,
 	};
 };
-player.prototype.inverse_down = function (ev) {
+player.prototype.point_inverse_down = function (ev) {
 	return {
 		point: a_mult_xy_p_v(this.rotate.inverse, ev.point),
 		startDelta: {x: 0, y: 0},
