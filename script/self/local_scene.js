@@ -14,11 +14,11 @@ var game_center = {x: g.game.width / 2, y: g.game.height / 2};
 var two_pi_to_360 = 360.0 / (2.0 * Math.PI);
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 var player = function() {
-	this.set_defualt();
+	this.set_default();
 };
 module.exports.player = player;
 
-player.prototype.set_defualt = function () {
+player.prototype.set_default = function () {
 	this.floating = false;
 	this.local_zero = {x: 0.0, y: 0.0};
 	this.global_zero = {x: 0.0, y: 0.0};
