@@ -258,7 +258,6 @@ module.exports.status_bar = {
 
 var window = {
 	max_prevDelta: cs[2] * cs[2], // per frame
-	max_multi_touch: 16,          // per player
 	max_pointers: 16,             // per player
 	max_multi_operation: 1,       // per player
 };

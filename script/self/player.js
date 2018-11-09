@@ -42,18 +42,26 @@ while (ii < conf.players.max_players) {
 
 var caster ={join_event: false};
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+function pass_through() {}
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 module.exports.caster         = caster;
 module.exports.current        = current;
 
 function init() {
 	g.game.join.add(function (ev) {
 		var player_index = 0;
-		if (!caster.join_event) {
-			caster.join_event = true;
-			if (ev.player === undefined) return;
-			if (ev.player.id === undefined) return;
-			current[player_index] = new_propoeties(ev.player, player_index, g.game.age);
+		try {
+			if (!caster.join_event) {
+				caster.join_event = true;
+				if (ev.player === undefined) return;
+				if (ev.player.id === undefined) return;
+				current[player_index] = new_propoeties(ev.player, player_index, g.game.age);
+			}
 		}
+		catch(e) {
+			pass_through(e);
+		}
+
 	});
 }
 module.exports.init = init;
