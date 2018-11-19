@@ -12,6 +12,6 @@ The repository provides the fast game development. It contains two parts, `rever
 Akashic Engine:2.1.2
 
 # Licence
-Codes are under the MIT license. See details in  `LICENSE ` file. The images are under creative commons 2.1 Japan by (CC BY 2.1 JP) license.
+Codes are under the MIT license. See details in  `LICENSE` file. The images are under creative commons 2.1 Japan by (CC BY 2.1 JP) license.
 * MIT, http://opensource.org/licenses/MIT
 * CC BY 2.1 JP, https://creativecommons.org/licenses/by/2.1/jp/deed.en
